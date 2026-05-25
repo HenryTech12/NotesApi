@@ -48,6 +48,24 @@ curl -X PATCH "https://notesapi-sgvx.onrender.com/notes/{id}?api-version=2024-05
      -d '{"title": "Updated Title Only"}'
 ```
 
+### Full Replacement (PUT)
+
+```bash
+curl -X PUT "https://notesapi-sgvx.onrender.com/notes/{id}?api-version=2024-05-25" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "title": "Completely New Title",
+       "body": "The body has also been completely replaced.",
+       "tags": ["updated"]
+     }'
+```
+
+### Delete a Note (DELETE)
+
+```bash
+curl -X DELETE "https://notesapi-sgvx.onrender.com/notes/{id}?api-version=2024-05-25"
+```
+
 ---
 
 ## 2. Error Scenarios (Azure Error Format)
