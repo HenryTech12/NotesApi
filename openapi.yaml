@@ -6,6 +6,8 @@ info:
 servers:
     - url: http://localhost:3000
       description: Local development server
+    - url: https://api.notes-service.com
+      description: Production server
 
 paths:
     /health:
