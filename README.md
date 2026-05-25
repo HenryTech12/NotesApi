@@ -23,19 +23,36 @@ A production-grade REST API built with FastAPI, strictly adhering to the **Micro
 
 ## 📋 API Overview
 
-Every request requires the `api-version` query parameter.
+Every request requires the `api-version` query parameter (e.g., `?api-version=2024-05-25`).
 
-### Example Usage
+### Example Usage & Testing
 
-```bash
-# List notes with pagination and filtering
-curl "http://localhost:3000/notes?api-version=2024-05-25&top=5&skip=0"
+To test the API and capture "screenshots" for your submission, run these commands in your terminal while the server is active:
 
-# Create a new note
-curl -X POST "http://localhost:3000/notes?api-version=2024-05-25" \
-     -H "Content-Type: application/json" \
-     -d '{"title": "Pro Tip", "body": "Always use Pydantic for validation.", "tags": ["coding"]}'
-```
+1. **Health Check** (Verifies connectivity):
+
+    ```bash
+    curl -i "http://localhost:3000/health?api-version=2024-05-25"
+    ```
+
+2. **List Notes** (Shows pagination & Azure headers):
+
+    ```bash
+    curl -i "http://localhost:3000/notes?api-version=2024-05-25&top=2"
+    ```
+
+3. **Create Note** (Tests validation & creation):
+    ```bash
+    curl -i -X POST "http://localhost:3000/notes?api-version=2024-05-25" \
+         -H "Content-Type: application/json" \
+         -d '{"title": "Submission Note", "body": "API is fully functional and compliant."}'
+    ```
+
+**How to provide screenshots:**
+
+-   Open your terminal (Command Prompt, PowerShell, or Bash).
+-   Run one of the `curl` commands above.
+-   Take a screenshot of the **Terminal window** ensuring both the `curl` command and the JSON response (along with the HTTP headers from `-i`) are clearly visible.
 
 | Method | Endpoint      | Description                                   |
 | ------ | ------------- | --------------------------------------------- |
