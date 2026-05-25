@@ -87,7 +87,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/NoteResponse"
+                                $ref: "#/components/schemas/Note"
                 "400":
                     $ref: "#/components/responses/ValidationError"
 
@@ -128,7 +128,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/NoteResponse"
+                                $ref: "#/components/schemas/Note"
                 "404":
                     $ref: "#/components/responses/NotFound"
 
@@ -146,7 +146,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/NoteResponse"
+                                $ref: "#/components/schemas/Note"
                 "404":
                     $ref: "#/components/responses/NotFound"
                 "400":
@@ -166,7 +166,7 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: "#/components/schemas/NoteResponse"
+                                $ref: "#/components/schemas/Note"
                 "404":
                     $ref: "#/components/responses/NotFound"
                 "400":
@@ -175,8 +175,16 @@ paths:
         delete:
             summary: Delete a note
             responses:
-                "204":
-                    description: No Content
+                "200":
+                    description: OK (Note: Brief requires 200 OK for deletes)
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: "Note with id ... deleted successfully."
                 "404":
                     $ref: "#/components/responses/NotFound"
 
@@ -231,25 +239,6 @@ components:
                     type: array
                     items:
                         type: string
-
-        PaginationMeta:
-            type: object
-            properties:
-                total: { type: integer }
-                page: { type: integer }
-                limit: { type: integer }
-                totalPages: { type: integer }
-                hasNextPage: { type: boolean }
-                hasPrevPage: { type: boolean }
-
-        NoteResponse:
-            type: object
-            properties:
-                success:
-                    type: boolean
-                    example: true
-                data:
-                    $ref: "#/components/schemas/Note"
 
         NoteBulkResponse:
             type: object
