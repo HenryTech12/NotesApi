@@ -1,6 +1,7 @@
 # src/main.py
 import yaml
 from fastapi import FastAPI, status, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -20,6 +21,13 @@ app = FastAPI(title="Notes API", version="1.0.0")
 store.seed()
 
 # Middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.add_middleware(AzureTelemetryMiddleware)
 
 # Exception Handlers

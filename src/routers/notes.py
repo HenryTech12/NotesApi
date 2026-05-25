@@ -29,12 +29,25 @@ router = APIRouter(
 @router.get("", response_model=NoteListResponse)
 async def list_notes(
     request: Request,
-    top: int = Query(10, ge=1, le=100),
-    skip: int = Query(0, ge=0),
+    top: Optional[int] = Query(None, ge=1, le=100),
+    skip: Optional[int] = Query(None, ge=0),
+    limit: Optional[int] = Query(None, ge=1, le=100),
+    page: Optional[int] = Query(None, ge=1),
     orderby: str = Query("createdAt desc"), # Azure uses space-separated desc/asc
     filter: Optional[str] = Query(None), # e.g. "tag eq 'work'"
     search: Optional[str] = None
 ):
+    # Resolve pagination aliases
+    # Priority: top/skip (Azure) > limit/page (Bonus Challenge)
+    final_top = top if top is not None else (limit if limit is not None else 10)
+    
+    if skip is not None:
+        final_skip = skip
+    elif page is not None:
+        final_skip = (page - 1) * final_top
+    else:
+        final_skip = 0
+
     notes = store.find_all()
 
     # Simple filter implementation (tag eq 'val')
@@ -56,15 +69,15 @@ async def list_notes(
         notes.sort(key=lambda x: x.get(sort_field, ""), reverse=reverse)
 
     total = len(notes)
-    data = notes[skip : skip + top]
+    data = notes[final_skip : final_skip + final_top]
     
     # nextLink generation following Azure pattern (absolute URL)
     next_link = None
-    if skip + top < total:
+    if final_skip + final_top < total:
         # Reconstruct URL with current params
         from urllib.parse import urlencode
         query_params = dict(request.query_params)
-        query_params["skip"] = str(skip + top)
+        query_params["skip"] = str(final_skip + final_top)
         query_string = urlencode(query_params)
         
         # request.url includes the scheme, host, and port correctly
