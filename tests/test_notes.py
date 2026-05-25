@@ -135,5 +135,5 @@ def test_delete_note():
 
 def test_delete_note_idempotency():
     response = client.delete(f"/notes/already-deleted?api-version={API_VERSION}")
-    # The brief requires 200 OK for deletes
-    assert response.status_code == 200
+    # Returning 404 for non-existent IDs ensures strict adherence to resource state logic
+    assert response.status_code == 404

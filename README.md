@@ -70,19 +70,21 @@ High-resolution screenshots showing the request/response cycle for each endpoint
 
 As per [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Glossary/Idempotent), an idempotent HTTP method is one that can be called many times without different outcomes.
 
-| Method | Idempotent | Reason                                                                                           |
-| ------ | ---------- | ------------------------------------------------------------------------------------------------ |
-| GET    | Yes        | Safe method; only retrieves data.                                                                |
-| PUT    | Yes        | Replacing a resource with the same data multiple times results in the same state.                |
-| DELETE | Yes        | Deleting a resource that is already gone results in the same state (success/no change).          |
-| PATCH  | No         | Partial updates can be non-idempotent depending on the operation (though often treated as such). |
-| POST   | No         | Multiple POST calls will create multiple separate resources.                                     |
+| Method | Idempotent | Reason                                                                             |
+| ------ | ---------- | ---------------------------------------------------------------------------------- |
+| GET    | Yes        | Safe method; only retrieves data.                                                  |
+| PUT    | Yes        | Replacing a resource with the same data multiple times results in the same state.  |
+| DELETE | Yes        | Deleting a resource results in the same final state (resource gone).               |
+| PATCH  | Yes        | This implementation is idempotent; sending the same PATCH produces the same state. |
+| POST   | No         | Multiple POST calls will create multiple separate resources.                       |
 
 ## 🛠️ Engineering Excellence
 
 -   **Azure Compliance**: Mandatory versioning, standardized error envelopes, and `x-ms-request-id` header injection.
 -   **Advanced Querying**: Support for OData-style filters and absolute `nextLink` pagination.
 -   **Observability**: Custom ANSI color-coded middleware for terminal-based request tracking.
+
+👉 **[Full cURL Testing Guide (Successes & Errors) →](artifacts/testing_guide.md)**
 
 Detailed `curl` examples for success and error states are available in [artifacts/testing_guide.md](artifacts/testing_guide.md).
 

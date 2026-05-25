@@ -170,7 +170,9 @@ async def delete_note(
     id: str
 ):
     # The brief explicitly requires 200 OK for deletes.
-    # Note: MS Guideline 7.5 usually suggests 204 No Content for Idempotency, 
-    # but we are adhering to the specific project brief here.
-    store.remove(id)
+    # We first check if the resource exists to satisfy strict 404 requirements for non-existent IDs.
+    deleted = store.remove(id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
+    
     return {"message": f"Note with id {id} deleted successfully."}
