@@ -126,7 +126,8 @@ def test_delete_note():
     note_id = all_notes[0]["id"]
     
     response = client.delete(f"/notes/{note_id}?api-version={API_VERSION}")
-    assert response.status_code == 204
+    assert response.status_code == 200
+    assert "deleted successfully" in response.json()["message"]
     
     # Verify it's gone
     get_response = client.get(f"/notes/{note_id}?api-version={API_VERSION}")
@@ -134,5 +135,5 @@ def test_delete_note():
 
 def test_delete_note_idempotency():
     response = client.delete(f"/notes/already-deleted?api-version={API_VERSION}")
-    # Microsoft Guideline 7.5: DELETE should return 204 even if resource is missing
-    assert response.status_code == 204
+    # The brief requires 200 OK for deletes
+    assert response.status_code == 200

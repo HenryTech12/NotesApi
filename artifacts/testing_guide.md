@@ -7,13 +7,13 @@ All requests require the `api-version=2024-05-25` query parameter.
 ### Health Check
 
 ```bash
-curl -X GET "http://localhost:3000/health?api-version=2024-05-25" -v
+curl -X GET "https://notesapi-sgvx.onrender.com/health?api-version=2024-05-25" -v
 ```
 
 ### Create a single Note
 
 ```bash
-curl -X POST "http://localhost:3000/notes?api-version=2024-05-25" \
+curl -X POST "https://notesapi-sgvx.onrender.com/notes?api-version=2024-05-25" \
      -H "Content-Type: application/json" \
      -H "x-ms-client-request-id: my-local-id-001" \
      -d '{
@@ -27,13 +27,13 @@ curl -X POST "http://localhost:3000/notes?api-version=2024-05-25" \
 
 ```bash
 # Get top 2 results tagged 'work'
-curl -X GET "http://localhost:3000/notes?api-version=2024-05-25&top=2&filter=tag eq 'work'"
+curl -X GET "https://notesapi-sgvx.onrender.com/notes?api-version=2024-05-25&top=2&filter=tag eq 'work'"
 ```
 
 ### Bulk Import
 
 ```bash
-curl -X POST "http://localhost:3000/notes/bulk?api-version=2024-05-25" \
+curl -X POST "https://notesapi-sgvx.onrender.com/notes/bulk?api-version=2024-05-25" \
      -H "Content-Type: application/json" \
      -d @artifacts/bulk_notes_data.json
 ```
@@ -43,7 +43,7 @@ curl -X POST "http://localhost:3000/notes/bulk?api-version=2024-05-25" \
 Replace `{id}` with a real ID from the list:
 
 ```bash
-curl -X PATCH "http://localhost:3000/notes/{id}?api-version=2024-05-25" \
+curl -X PATCH "https://notesapi-sgvx.onrender.com/notes/{id}?api-version=2024-05-25" \
      -H "Content-Type: application/json" \
      -d '{"title": "Updated Title Only"}'
 ```
@@ -52,10 +52,10 @@ curl -X PATCH "http://localhost:3000/notes/{id}?api-version=2024-05-25" \
 
 ## 2. Error Scenarios (Azure Error Format)
 
-### Missing API Version (400 Bad Request)
+### Missing API Version (400 Bad Request) (Optional setting depending on middleware)
 
 ```bash
-curl -X GET "http://localhost:3000/notes"
+curl -X GET "https://notesapi-sgvx.onrender.com/notes"
 ```
 
 **Expected Response:**
@@ -74,7 +74,7 @@ curl -X GET "http://localhost:3000/notes"
 Triggering a "body too short" error:
 
 ```bash
-curl -X POST "http://localhost:3000/notes?api-version=2024-05-25" \
+curl -X POST "https://notesapi-sgvx.onrender.com/notes?api-version=2024-05-25" \
      -H "Content-Type: application/json" \
      -d '{"title": "Oops", "body": "no"}'
 ```
@@ -98,6 +98,10 @@ curl -X POST "http://localhost:3000/notes?api-version=2024-05-25" \
 ```
 
 ### Resource Not Found (404 Not Found)
+
+```bash
+curl -X GET "https://notesapi-sgvx.onrender.com/notes/invalid-uuid-format?api-version=2024-05-25"
+```
 
 ```bash
 curl -X GET "http://localhost:3000/notes/invalid-uuid?api-version=2024-05-25"

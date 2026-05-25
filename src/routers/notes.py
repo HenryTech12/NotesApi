@@ -165,10 +165,12 @@ async def patch_note(
         raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
     return note
 
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_note(
     id: str
 ):
-    # MS Guideline 7.5: DELETE should return 204 even if the resource is already gone (Idempotency)
+    # The brief explicitly requires 200 OK for deletes.
+    # Note: MS Guideline 7.5 usually suggests 204 No Content for Idempotency, 
+    # but we are adhering to the specific project brief here.
     store.remove(id)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return {"message": f"Note with id {id} deleted successfully."}

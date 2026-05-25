@@ -1,5 +1,10 @@
 # Notes API (Microsoft Azure Aligned)
 
+## 🌐 Live Demo
+
+-   **Base URL:** [https://notesapi-sgvx.onrender.com](https://notesapi-sgvx.onrender.com)
+-   **Interactive Docs:** [https://notesapi-sgvx.onrender.com/docs](https://notesapi-sgvx.onrender.com/docs)
+
 A production-grade REST API built with FastAPI, strictly adhering to the **Microsoft Azure REST API Guidelines**.
 
 ## 🚀 Setup & Run
@@ -32,37 +37,46 @@ To test the API and capture "screenshots" for your submission, run these command
 1. **Health Check** (Verifies connectivity):
 
     ```bash
-    curl -i "http://localhost:3000/health?api-version=2024-05-25"
+    curl -i "https://notesapi-sgvx.onrender.com/health?api-version=2024-05-25"
     ```
 
 2. **List Notes** (Shows pagination & Azure headers):
 
     ```bash
-    curl -i "http://localhost:3000/notes?api-version=2024-05-25&top=2"
+    curl -i "https://notesapi-sgvx.onrender.com/notes?api-version=2024-05-25&top=2"
     ```
 
 3. **Create Note** (Tests validation & creation):
     ```bash
-    curl -i -X POST "http://localhost:3000/notes?api-version=2024-05-25" \
+    curl -i -X POST "https://notesapi-sgvx.onrender.com/notes?api-version=2024-05-25" \
          -H "Content-Type: application/json" \
          -d '{"title": "Submission Note", "body": "API is fully functional and compliant."}'
     ```
 
-**How to provide screenshots:**
+**Screenshots:**
+High-resolution screenshots showing the request/response cycle for each endpoint can be found in the [postman-screenshots/](postman-screenshots/) directory.
 
--   Open your terminal (Command Prompt, PowerShell, or Bash).
--   Run one of the `curl` commands above.
--   Take a screenshot of the **Terminal window** ensuring both the `curl` command and the JSON response (along with the HTTP headers from `-i`) are clearly visible.
+| Method | Endpoint      | Description                                   | Status Code |
+| ------ | ------------- | --------------------------------------------- | ----------- |
+| GET    | `/notes`      | List with `top`, `skip`, `filter`, `orderby`. | 200 OK      |
+| POST   | `/notes`      | Create a new note.                            | 201 Created |
+| POST   | `/notes/bulk` | Ingest multiple notes.                        | 201 Created |
+| GET    | `/notes/{id}` | Retrieve a specific note.                     | 200 OK      |
+| PATCH  | `/notes/{id}` | Partially update a note.                      | 200 OK      |
+| PUT    | `/notes/{id}` | Replace a note entirely.                      | 200 OK      |
+| DELETE | `/notes/{id}` | Remove a note.                                | 200 OK      |
 
-| Method | Endpoint      | Description                                   |
-| ------ | ------------- | --------------------------------------------- |
-| GET    | `/notes`      | List with `top`, `skip`, `filter`, `orderby`. |
-| POST   | `/notes`      | Create a new note.                            |
-| POST   | `/notes/bulk` | Ingest multiple notes.                        |
-| GET    | `/notes/{id}` | Retrieve a specific note.                     |
-| PATCH  | `/notes/{id}` | Partially update a note.                      |
-| PUT    | `/notes/{id}` | Replace a note entirely.                      |
-| DELETE | `/notes/{id}` | Remove a note (204 No Content).               |
+## 🔄 Idempotency
+
+As per [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Glossary/Idempotent), an idempotent HTTP method is one that can be called many times without different outcomes.
+
+| Method | Idempotent | Reason                                                                                           |
+| ------ | ---------- | ------------------------------------------------------------------------------------------------ |
+| GET    | Yes        | Safe method; only retrieves data.                                                                |
+| PUT    | Yes        | Replacing a resource with the same data multiple times results in the same state.                |
+| DELETE | Yes        | Deleting a resource that is already gone results in the same state (success/no change).          |
+| PATCH  | No         | Partial updates can be non-idempotent depending on the operation (though often treated as such). |
+| POST   | No         | Multiple POST calls will create multiple separate resources.                                     |
 
 ## 🛠️ Engineering Excellence
 
