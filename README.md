@@ -66,6 +66,10 @@ High-resolution screenshots showing the request/response cycle for each endpoint
 | PUT    | `/notes/{id}` | Replace a note entirely.                      | 200 OK      |
 | DELETE | `/notes/{id}` | Remove a note.                                | 200 OK      |
 
+### 🔧 Full Testing Guide
+
+For a complete set of cURL commands covering all success and error scenarios (PUT, PATCH, DELETE, and Validation Errors), see the **[Full cURL Testing Guide →](artifacts/testing_guide.md)**.
+
 ## 🔄 Idempotency
 
 As per [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Glossary/Idempotent), an idempotent HTTP method is one that can be called many times without different outcomes.
@@ -84,12 +88,8 @@ As per [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Glossary/Idempote
 -   **Advanced Querying**: Support for OData-style filters and absolute `nextLink` pagination.
 -   **Observability**: Custom ANSI color-coded middleware for terminal-based request tracking.
 
-👉 **[Full cURL Testing Guide (Successes & Errors) →](artifacts/testing_guide.md)**
-
-Detailed `curl` examples for success and error states are available in [artifacts/testing_guide.md](artifacts/testing_guide.md).
-
 ## 🧪 Testing & Seed Data
 
-## The application automatically boots up with **3 pre-seeded notes** via \`store.seed()\`. This allows judges and developers to immediately test pagination, sorting, and filtering parameters without manually creating data first.
+The application automatically boots up with **3 pre-seeded notes** via `store.seed()`. This allows judges and developers to immediately test pagination, sorting, and filtering parameters without manually creating data first.
 
 _Built for the IEEE x GitHub Campus Experts Codeathon._
