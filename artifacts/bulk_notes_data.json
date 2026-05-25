@@ -1,0 +1,253 @@
+[
+    {
+        "title": "Morning Routine",
+        "body": "Drink water, meditate for 10 minutes, and light stretching.",
+        "tags": ["wellness", "morning"]
+    },
+    {
+        "title": "Shopping List",
+        "body": "Milk, eggs, sourdough bread, avocados, and coffee beans.",
+        "tags": ["personal", "todo"]
+    },
+    {
+        "title": "Project Alpha Strategy",
+        "body": "Focus on the MVP first, then iterate based on user feedback.",
+        "tags": ["work", "strategy"]
+    },
+    {
+        "title": "FastAPI Tips",
+        "body": "Use Pydantic for validation and check out dependency injection.",
+        "tags": ["coding", "python"]
+    },
+    {
+        "title": "Book Review: Dune",
+        "body": "Incredible world-building. The political intrigue is top-notch.",
+        "tags": ["hobby", "reading"]
+    },
+    {
+        "title": "Gym Workout",
+        "body": "Squats 3x10, Bench Press 3x10, Deadlifts 1x5.",
+        "tags": ["fitness"]
+    },
+    {
+        "title": "Vacation Ideas",
+        "body": "Visit Kyoto in the spring for cherry blossoms.",
+        "tags": ["travel", "japan"]
+    },
+    {
+        "title": "Meeting Notes",
+        "body": "Discussed the quarterly budget. Need to follow up with HR.",
+        "tags": ["work"]
+    },
+    {
+        "title": "Gift Ideas",
+        "body": "Leather wallet for Dad, scented candles for Sarah.",
+        "tags": ["personal"]
+    },
+    {
+        "title": "Recipe: Pasta",
+        "body": "Garlic, olive oil, chili flakes, and lots of parmesan.",
+        "tags": ["cooking"]
+    },
+    {
+        "title": "Tech Stack Decisions",
+        "body": "Switching to PostgreSQL for better ACID compliance.",
+        "tags": ["work", "tech"]
+    },
+    {
+        "title": "Weekly Goals",
+        "body": "Finish the API, write tests, and update the documentation.",
+        "tags": ["todo"]
+    },
+    {
+        "title": "Movie List",
+        "body": "Interstellar, Inception, The Prestige, Oppenheimer.",
+        "tags": ["hobby", "movies"]
+    },
+    {
+        "title": "Meditation Logs",
+        "body": "Felt very distracted today. Tomorrow will be better.",
+        "tags": ["wellness"]
+    },
+    {
+        "title": "Bug Fixes",
+        "status": "Urgent",
+        "body": "Fix the race condition in the auth middleware.",
+        "tags": ["work", "coding"]
+    },
+    {
+        "title": "Language Learning",
+        "body": "Practice Spanish verbs for 20 minutes on Duolingo.",
+        "tags": ["hobby", "learning"]
+    },
+    {
+        "title": "Financial Planning",
+        "body": "Allocate 20% of income to savings and 10% to investments.",
+        "tags": ["personal", "finance"]
+    },
+    {
+        "title": "Garden Maintenance",
+        "body": "Water the tomatoes and prune the rose bushes.",
+        "tags": ["hobby", "home"]
+    },
+    {
+        "title": "Product Pitch",
+        "body": "A decentralized platform for creative professionals.",
+        "tags": ["work", "startup"]
+    },
+    {
+        "title": "Inspiration",
+        "body": "The best way to predict the future is to invent it.",
+        "tags": ["quotes"]
+    },
+    {
+        "title": "Study Notes: React",
+        "body": "Components, Props, State, and the Virtual DOM.",
+        "tags": ["coding", "learning"]
+    },
+    {
+        "title": "Podcast Ideas",
+        "body": "The future of AI in the creative industry.",
+        "tags": ["hobby", "creative"]
+    },
+    {
+        "title": "Car Maintenance",
+        "body": "Check tire pressure and schedule an oil change.",
+        "tags": ["personal"]
+    },
+    {
+        "title": "Home Improvement",
+        "body": "Paint the guest bedroom light blue.",
+        "tags": ["home"]
+    },
+    {
+        "title": "Networking Tips",
+        "body": "Follow up within 24 hours of meeting someone new.",
+        "tags": ["work", "career"]
+    },
+    {
+        "title": "Photography Gear",
+        "body": "Save up for the 35mm f/1.8 prime lens.",
+        "tags": ["hobby", "gear"]
+    },
+    {
+        "title": "Writing Prompts",
+        "body": "A world where sleep is no longer required.",
+        "tags": ["hobby", "writing"]
+    },
+    {
+        "title": "Software Design",
+        "body": "Prefer composition over inheritance for better flexibility.",
+        "tags": ["coding", "work"]
+    },
+    {
+        "title": "Cleaning Schedule",
+        "body": "Vacuum on Mondays, scrub the bathroom on Thursdays.",
+        "tags": ["home"]
+    },
+    {
+        "title": "Dog Training",
+        "body": "Practice 'stay' and 'wait' at the park.",
+        "tags": ["personal", "pets"]
+    },
+    {
+        "title": "Holiday Planning",
+        "body": "Book flights for December by mid-October.",
+        "tags": ["travel"]
+    },
+    {
+        "title": "Career Goals",
+        "body": "Become a Senior Developer by next summer.",
+        "tags": ["career"]
+    },
+    {
+        "title": "Music Playlists",
+        "body": "Focus Flow, Lofi Beats, and Synthwave Essentials.",
+        "tags": ["hobby"]
+    },
+    {
+        "title": "Self-Reflection",
+        "body": "What made me proud this week? What can I improve?",
+        "tags": ["wellness"]
+    },
+    {
+        "title": "API Versions",
+        "body": "Support v1 while developing v2 in parallel.",
+        "tags": ["coding", "work"]
+    },
+    {
+        "title": "Interior Design",
+        "body": "Add more plants to the living room for a natural vibe.",
+        "tags": ["home"]
+    },
+    {
+        "title": "Skincare Routine",
+        "body": "Cleanser, Vitamin C serum, Moisturizer, and SPF.",
+        "tags": ["wellness"]
+    },
+    {
+        "title": "Game Night",
+        "body": "Invite friends over for Catan and pizza.",
+        "tags": ["hobby", "social"]
+    },
+    {
+        "title": "Conference Notes",
+        "body": "Keynote on the ethics of generative AI was superb.",
+        "tags": ["work", "tech"]
+    },
+    {
+        "title": "Life Hack",
+        "body": "Use keyboard shortcuts to save hours every week.",
+        "tags": ["productivity"]
+    },
+    {
+        "title": "Science News",
+        "body": "New discoveries in quantum computing hardware.",
+        "tags": ["tech", "science"]
+    },
+    {
+        "title": "Blog Post Idea",
+        "body": "Why I moved from JavaScript to TypeScript.",
+        "tags": ["coding"]
+    },
+    {
+        "title": "Kitchen Gadgets",
+        "body": "Air fryer is a total game changer for quick meals.",
+        "tags": ["home"]
+    },
+    {
+        "title": "Running Route",
+        "body": "The 5k loop around the local lake is beautiful.",
+        "tags": ["fitness", "outdoor"]
+    },
+    {
+        "title": "Code Snippet",
+        "body": "Example of a custom React hook for fetching data.",
+        "tags": ["coding"]
+    },
+    {
+        "title": "Dream Journal",
+        "body": "I was flying over a city made of giant crystals.",
+        "tags": ["personal", "wellness"]
+    },
+    {
+        "title": "App Idea",
+        "body": "A simple habit tracker for busy developers.",
+        "tags": ["startup", "coding"]
+    },
+    {
+        "title": "Philosophy",
+        "body": "Amor Fati: Love your fate, no matter what it brings.",
+        "tags": ["quotes", "learning"]
+    },
+    {
+        "title": "Security Check",
+        "body": "Rotate all API keys and enable 2FA on all accounts.",
+        "tags": ["work", "tech"]
+    },
+    {
+        "title": "Reflection",
+        "body": "Consistency is more important than intensity.",
+        "tags": ["wellness", "productivity"]
+    }
+]

@@ -1,5 +1,5 @@
 # src/schemas/note_schema.py
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from typing import List, Optional
 
 class NoteBase(BaseModel):
@@ -24,33 +24,41 @@ class NoteUpdate(BaseModel):
             return v.strip()
         return v
 
+    @model_validator(mode="after")
+    def check_at_least_one_field(self) -> "NoteUpdate":
+        if self.title is None and self.body is None and self.tags is None:
+            raise ValueError("At least one of [title, body, tags] must be provided.")
+        return self
+
 class Note(NoteBase):
     id: str
     createdAt: str
     updatedAt: str
 
-# Response Shapes
-class SuccessResponse(BaseModel):
-    success: bool = True
-    data: dict
-
-class NoteListMeta(BaseModel):
-    total: int
-    page: int
-    limit: int
-    totalPages: int
-    hasNextPage: bool
-    hasPrevPage: bool
+# Response Shapes following Azure guidelines (Direct resource or 'value' for collections)
+# Note: x-ms-request-id is handled in middleware headers
 
 class NoteListResponse(BaseModel):
-    success: bool = True
-    data: List[Note]
-    meta: NoteListMeta
+    value: List[Note]
+    nextLink: Optional[str] = None
 
-class ErrorDetail(BaseModel):
-    field: str
+class NoteBulkResponse(BaseModel):
+    value: List[Note]
+
+# Error schemas matching Azure standard
+class InnerError(BaseModel):
+    code: Optional[str] = None
+    innererror: Optional["InnerError"] = None
+
+class AzureErrorDetail(BaseModel):
+    code: str
     message: str
+    target: Optional[str] = None
+    details: Optional[List["AzureErrorDetail"]] = None
+    innererror: Optional[InnerError] = None
 
-class ErrorResponse(BaseModel):
-    success: bool = False
-    error: dict # {message: str, details: optional list}
+class AzureErrorResponse(BaseModel):
+    error: AzureErrorDetail
+
+AzureErrorDetail.model_rebuild()
+InnerError.model_rebuild()

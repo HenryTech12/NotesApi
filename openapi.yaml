@@ -1,295 +1,303 @@
 openapi: 3.0.3
 info:
-  title: Notes API (FastAPI)
-  description: Production-grade Notes REST API for competitive hackathons.
-  version: 1.0.0
+    title: Notes API (Azure Aligned)
+    description: Production-grade Notes REST API following Microsoft Azure REST API Guidelines.
+    version: 1.0.0
 servers:
-  - url: http://localhost:3000/api/v1
-    description: Local development server
+    - url: http://localhost:3000
+      description: Local development server
 
 paths:
-  /health:
-    get:
-      summary: Health check
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: ok
+    /health:
+        get:
+            summary: Health check
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+                      example: "2024-05-25"
+            responses:
+                "200":
+                    description: OK
 
-  /notes:
-    get:
-      summary: List all notes
-      parameters:
-        - name: page
-          in: query
-          schema:
-            type: integer
-            default: 1
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 10
-            maximum: 100
-        - name: sort
-          in: query
-          schema:
-            type: string
-            enum: [createdAt, updatedAt, title]
-            default: createdAt
-        - name: order
-          in: query
-          schema:
-            type: string
-            enum: [asc, desc]
-            default: desc
-        - name: tag
-          in: query
-          schema:
-            type: string
-        - name: search
-          in: query
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NoteListResponse'
+    /notes:
+        get:
+            summary: List all notes
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+                - name: top
+                  in: query
+                  schema:
+                      type: integer
+                      default: 10
+                - name: skip
+                  in: query
+                  schema:
+                      type: integer
+                      default: 0
+                - name: orderby
+                  in: query
+                  schema:
+                      type: string
+                      example: "createdAt desc"
+                - name: filter
+                  in: query
+                  schema:
+                      type: string
+                      example: "tag eq 'work'"
+            responses:
+                "200":
+                    description: Success
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoteListResponse"
 
-    post:
-      summary: Create a new note
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NoteInput'
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NoteResponse'
-        '422':
-          $ref: '#/components/responses/ValidationError'
+        post:
+            summary: Create a new note
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NoteInput"
+            responses:
+                "201":
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoteResponse"
+                "400":
+                    $ref: "#/components/responses/ValidationError"
 
-  /notes/{id}:
-    parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-    get:
-      summary: Get a note by ID
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NoteResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
+    /notes/bulk:
+        post:
+            summary: Create multiple notes at once
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/NoteInput"
+            responses:
+                "201":
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoteBulkResponse"
+                "400":
+                    $ref: "#/components/responses/ValidationError"
 
-    put:
-      summary: Replace a note (Full Update)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NoteInput'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
+    /notes/{id}:
+        parameters:
+            - name: id
+              in: path
+              required: true
               schema:
-                $ref: '#/components/schemas/NoteResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ValidationError'
+                  type: string
+                  format: uuid
+        get:
+            summary: Get a note by ID
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoteResponse"
+                "404":
+                    $ref: "#/components/responses/NotFound"
 
-    patch:
-      summary: Update a note (Partial Update)
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/NoteInputPartial'
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NoteResponse'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '422':
-          $ref: '#/components/responses/ValidationError'
+        put:
+            summary: Replace a note (Full Update)
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NoteInput"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoteResponse"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "400":
+                    $ref: "#/components/responses/ValidationError"
 
-    delete:
-      summary: Delete a note
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  data:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-        '404':
-          $ref: '#/components/responses/NotFound'
+        patch:
+            summary: Update a note (Partial Update)
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NoteInputPartial"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoteResponse"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+                "400":
+                    $ref: "#/components/responses/ValidationError"
+
+        delete:
+            summary: Delete a note
+            responses:
+                "204":
+                    description: No Content
+                "404":
+                    $ref: "#/components/responses/NotFound"
 
 components:
-  schemas:
-    Note:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        title:
-          type: string
-          maxLength: 150
-        body:
-          type: string
-          minLength: 3
-          maxLength: 5000
-        tags:
-          type: array
-          items:
-            type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
+    schemas:
+        Note:
+            type: object
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                title:
+                    type: string
+                    maxLength: 150
+                body:
+                    type: string
+                    minLength: 3
+                    maxLength: 5000
+                tags:
+                    type: array
+                    items:
+                        type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
 
-    NoteInput:
-      type: object
-      required: [title, body]
-      properties:
-        title:
-          type: string
-        body:
-          type: string
-        tags:
-          type: array
-          items:
-            type: string
+        NoteInput:
+            type: object
+            required: [title, body]
+            properties:
+                title:
+                    type: string
+                body:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
 
-    NoteInputPartial:
-      type: object
-      minProperties: 1
-      properties:
-        title:
-          type: string
-        body:
-          type: string
-        tags:
-          type: array
-          items:
-            type: string
+        NoteInputPartial:
+            type: object
+            minProperties: 1
+            properties:
+                title:
+                    type: string
+                body:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
 
-    PaginationMeta:
-      type: object
-      properties:
-        total: { type: integer }
-        page: { type: integer }
-        limit: { type: integer }
-        totalPages: { type: integer }
-        hasNextPage: { type: boolean }
-        hasPrevPage: { type: boolean }
+        PaginationMeta:
+            type: object
+            properties:
+                total: { type: integer }
+                page: { type: integer }
+                limit: { type: integer }
+                totalPages: { type: integer }
+                hasNextPage: { type: boolean }
+                hasPrevPage: { type: boolean }
 
-    NoteResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        data:
-          $ref: '#/components/schemas/Note'
+        NoteResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                data:
+                    $ref: "#/components/schemas/Note"
 
-    NoteListResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: true
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Note'
-        meta:
-          $ref: '#/components/schemas/PaginationMeta'
+        NoteBulkResponse:
+            type: object
+            required: [value]
+            properties:
+                value:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Note"
 
-    ErrorResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            message:
-              type: string
+        NoteListResponse:
+            type: object
+            required: [value]
+            properties:
+                value:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Note"
+                nextLink:
+                    type: string
+                    nullable: true
+                    example: "http://localhost:3000/notes?api-version=2024-05-25&top=10&skip=10"
 
-    ValidationError:
-      type: object
-      properties:
-        success:
-          type: boolean
-          example: false
-        error:
-          type: object
-          properties:
-            message:
-              type: string
-              example: Validation failed.
-            details:
-              type: array
-              items:
-                type: object
-                properties:
-                  field: { type: string }
-                  message: { type: string }
+        AzureErrorDetail:
+            type: object
+            required: [code, message]
+            properties:
+                code:
+                    type: string
+                message:
+                    type: string
+                target:
+                    type: string
+                details:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/AzureErrorDetail"
+                innererror:
+                    type: object
+                    properties:
+                        code:
+                            type: string
+                        innererror:
+                            type: object
 
-  responses:
-    NotFound:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    ValidationError:
-      description: Validation error
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ValidationError'
+        ErrorResponse:
+            type: object
+            required: [error]
+            properties:
+                error:
+                    $ref: "#/components/schemas/AzureErrorDetail"
+
+    responses:
+        NotFound:
+            description: Resource not found
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/ErrorResponse"
+        ValidationError:
+            description: Validation error
+            content:
+                application/json:
+                    schema:
+                        $ref: "#/components/schemas/ErrorResponse"

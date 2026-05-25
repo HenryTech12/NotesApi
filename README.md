@@ -1,85 +1,62 @@
-# Production-Grade Notes REST API (FastAPI)
+# Notes API (Microsoft Azure Aligned)
 
-A robust, production-ready Notes API built with Python and FastAPI for the IEEE x GitHub Campus Experts 10-Day Codeathon. This version emphasizes type safety, high performance, and standard engineering practices.
+A production-grade REST API built with FastAPI, strictly adhering to the **Microsoft Azure REST API Guidelines**.
 
-## 🚀 Tech Stack
-
-- **Runtime:** Python 3.9+
-- **Framework:** FastAPI
-- **Validation:** Pydantic v2
-- **Server:** Uvicorn
-- **ID Generation:** UUID v4
-
-## 🛠️ Setup & Run
+## 🚀 Setup & Run
 
 1. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 2. **Start the Server:**
-   ```bash
-   python src/main.py
-   ```
-   *Or using uvicorn directly:*
-   ```bash
-   uvicorn src.main:app --host 0.0.0.0 --port 3000 --reload
-   ```
 
-The server will be running at `http://localhost:3000`.
+    ```bash
+    python src/main.py
+    ```
 
-## 📌 API Endpoints
+3. **Run Tests:**
+    ```bash
+    PYTHONPATH=$PWD pytest -v
+    ```
 
-Base Path: `/api/v1`
+## 📋 API Overview
 
-### Health Check
-- `GET /health` - Check if the API is alive.
+Every request requires the `api-version` query parameter.
 
-### Notes CRUD
-- `POST /notes` - Create a new note.
-- `GET /notes` - List all notes (supports pagination/sorting/filtering).
-- `GET /notes/:id` - Get a specific note.
-- `PUT /notes/:id` - Replace an entire note.
-- `PATCH /notes/:id` - Partially update a note.
-- `DELETE /notes/:id` - Delete a note.
+### Example Usage
 
-## 🔍 Query Parameters (`GET /notes`)
-
-| Parameter | Default | Description |
-| :--- | :--- | :--- |
-| `page` | `1` | Page number. |
-| `limit` | `10` | Notes per page (Min: 1, Max: 100). |
-| `sort` | `createdAt` | Sort by `createdAt`, `updatedAt`, or `title`. |
-| `order` | `desc` | `asc` or `desc`. |
-| `tag` | - | Filter by a specific tag (exact match). |
-| `search` | - | Case-insensitive search in `title` and `body`. |
-
-## 📡 CURL Examples
-
-### Create a Note
 ```bash
-curl -X POST http://localhost:3000/api/v1/notes \
--H "Content-Type: application/json" \
--d '{"title": "FastAPI Power", "body": "Building APIs with Pydantic is amazing.", "tags": ["python", "fastapi"]}'
+# List notes with pagination and filtering
+curl "http://localhost:3000/notes?api-version=2024-05-25&top=5&skip=0"
+
+# Create a new note
+curl -X POST "http://localhost:3000/notes?api-version=2024-05-25" \
+     -H "Content-Type: application/json" \
+     -d '{"title": "Pro Tip", "body": "Always use Pydantic for validation.", "tags": ["coding"]}'
 ```
 
-### List Notes (Sorted by Title)
-```bash
-curl "http://localhost:3000/api/v1/notes?sort=title&order=asc"
-```
+| Method | Endpoint      | Description                                   |
+| ------ | ------------- | --------------------------------------------- |
+| GET    | `/notes`      | List with `top`, `skip`, `filter`, `orderby`. |
+| POST   | `/notes`      | Create a new note.                            |
+| POST   | `/notes/bulk` | Ingest multiple notes.                        |
+| GET    | `/notes/{id}` | Retrieve a specific note.                     |
+| PATCH  | `/notes/{id}` | Partially update a note.                      |
+| PUT    | `/notes/{id}` | Replace a note entirely.                      |
+| DELETE | `/notes/{id}` | Remove a note (204 No Content).               |
 
-### Delete a Note
-```bash
-curl -X DELETE http://localhost:3000/api/v1/notes/<id>
-```
+## 🛠️ Engineering Excellence
 
-## 🧠 Engineering Standards Applied
+-   **Azure Compliance**: Mandatory versioning, standardized error envelopes, and `x-ms-request-id` header injection.
+-   **Advanced Querying**: Support for OData-style filters and absolute `nextLink` pagination.
+-   **Observability**: Custom ANSI color-coded middleware for terminal-based request tracking.
 
-- **Type Safety:** Full Pydantic schemas for request and response validation.
-- **Custom Exception Handling:** Centralized handlers to ensure consistent error shapes even for 422 errors.
-- **ANSI Logging:** Middleware for color-coded request logging.
-- **Immutability:** Immutable `id` and `createdAt` fields.
-- **Auto-Documentation:** Interactive Swagger UI available at `/docs`.
+Detailed `curl` examples for success and error states are available in [artifacts/testing_guide.md](artifacts/testing_guide.md).
 
----
-*Built for the IEEE x GitHub Campus Experts Codeathon.*
+## 🧪 Testing & Seed Data
+
+## The application automatically boots up with **3 pre-seeded notes** via \`store.seed()\`. This allows judges and developers to immediately test pagination, sorting, and filtering parameters without manually creating data first.
+
+_Built for the IEEE x GitHub Campus Experts Codeathon._

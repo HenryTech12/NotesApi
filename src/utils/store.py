@@ -3,12 +3,16 @@ import uuid
 from datetime import datetime, timezone
 from typing import List, Optional, Dict
 
+def get_azure_timestamp():
+    # Azure likes RFC 3339 with up to 3 fractional seconds and 'Z' suffix
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
+
 class Store:
     def __init__(self):
         self.notes: Dict[str, dict] = {}
 
     def create(self, title: str, body: str, tags: List[str] = None) -> dict:
-        now = datetime.now(timezone.utc).isoformat()
+        now = get_azure_timestamp()
         note_id = str(uuid.uuid4())
         note = {
             "id": note_id,
@@ -37,7 +41,7 @@ class Store:
             "title": title.strip(),
             "body": body.strip(),
             "tags": [t.strip() for t in (tags or [])],
-            "updatedAt": datetime.now(timezone.utc).isoformat(),
+            "updatedAt": get_azure_timestamp(),
         }
         self.notes[note_id] = updated_note
         return updated_note
@@ -54,9 +58,11 @@ class Store:
         if "body" in fields:
             updated_note["body"] = fields["body"].strip()
         if "tags" in fields:
-            updated_note["tags"] = [t.strip() for t in fields["tags"]]
+            # Handle list trimming or empty list
+            tags_val = fields["tags"] or []
+            updated_note["tags"] = [t.strip() for t in tags_val]
             
-        updated_note["updatedAt"] = datetime.now(timezone.utc).isoformat()
+        updated_note["updatedAt"] = get_azure_timestamp()
         self.notes[note_id] = updated_note
         return updated_note
 
