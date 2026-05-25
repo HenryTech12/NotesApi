@@ -100,11 +100,7 @@ curl -X POST "https://notesapi-sgvx.onrender.com/notes?api-version=2024-05-25" \
 ### Resource Not Found (404 Not Found)
 
 ```bash
-curl -X GET "https://notesapi-sgvx.onrender.com/notes/invalid-uuid-format?api-version=2024-05-25"
-```
-
-```bash
-curl -X GET "http://localhost:3000/notes/invalid-uuid?api-version=2024-05-25"
+curl -X GET "https://notesapi-sgvx.onrender.com/notes/invalid-uuid?api-version=2024-05-25"
 ```
 
 **Expected Response:**
@@ -121,7 +117,7 @@ curl -X GET "http://localhost:3000/notes/invalid-uuid?api-version=2024-05-25"
 ### Empty PATCH Payload (400 Bad Request)
 
 ```bash
-curl -X PATCH "http://localhost:3000/notes/{id}?api-version=2024-05-25" \
+curl -X PATCH "https://notesapi-sgvx.onrender.com/notes/{id}?api-version=2024-05-25" \
      -H "Content-Type: application/json" \
      -d '{}'
 ```
