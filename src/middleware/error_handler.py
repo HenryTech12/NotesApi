@@ -18,26 +18,21 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
-    # Map status codes to machine-readable codes where possible
-    code = "ServiceError"
-    if exc.status_code == 404:
-        code = "ResourceNotFound"
-    elif exc.status_code == 409:
-        code = "Conflict"
-    elif exc.status_code == 403:
-        code = "Forbidden"
-    elif exc.status_code == 401:
-        code = "Unauthorized"
+    code_map = {404: "ResourceNotFound", 409: "Conflict", 403: "Forbidden", 401: "Unauthorized"}
     
+    # If detail is already a structured dict, use it directly as the error body
+    if isinstance(exc.detail, dict):
+        return JSONResponse(
+            status_code=exc.status_code,
+            headers={"x-ms-error-code": exc.detail.get("code", "ServiceError")},
+            content={"error": exc.detail}
+        )
+    
+    code = code_map.get(exc.status_code, "ServiceError")
     return JSONResponse(
         status_code=exc.status_code,
         headers={"x-ms-error-code": code},
-        content={
-            "error": {
-                "code": code,
-                "message": str(exc.detail)
-            }
-        },
+        content={"error": {"code": code, "message": str(exc.detail)}}
     )
 
 async def validation_exception_handler(request: Request, exc: RequestValidationError):

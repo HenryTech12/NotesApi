@@ -12,11 +12,24 @@ DEFAULT_API_VERSION = "2024-05-25"
 
 async def verify_api_version(api_version: Optional[str] = Query(None, alias="api-version")):
     if api_version is None:
-        return DEFAULT_API_VERSION
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "code": "MissingApiVersion",
+                "message": "The 'api-version' query parameter is required.",
+                "availableVersions": SUPPORTED_API_VERSIONS,
+                "hint": f"Add ?api-version={DEFAULT_API_VERSION} to your request."
+            }
+        )
     if api_version not in SUPPORTED_API_VERSIONS:
         raise HTTPException(
-            status_code=400, 
-            detail=f"Unsupported api-version '{api_version}'. The supported api-versions are '{', '.join(SUPPORTED_API_VERSIONS)}'."
+            status_code=400,
+            detail={
+                "code": "UnsupportedApiVersion",
+                "message": f"api-version '{api_version}' is not supported.",
+                "availableVersions": SUPPORTED_API_VERSIONS,
+                "hint": f"Use one of: {', '.join(SUPPORTED_API_VERSIONS)}"
+            }
         )
     return api_version
 

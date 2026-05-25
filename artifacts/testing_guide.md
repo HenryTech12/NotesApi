@@ -70,7 +70,7 @@ curl -X DELETE "https://notesapi-sgvx.onrender.com/notes/{id}?api-version=2024-0
 
 ## 2. Error Scenarios (Azure Error Format)
 
-### Missing API Version (400 Bad Request) (Optional setting depending on middleware)
+### Missing API Version (400 Bad Request)
 
 ```bash
 curl -X GET "https://notesapi-sgvx.onrender.com/notes"
@@ -81,8 +81,29 @@ curl -X GET "https://notesapi-sgvx.onrender.com/notes"
 ```json
 {
     "error": {
-        "code": "InvalidRequest",
-        "message": "The api-version query parameter (?api-version=) is required for all requests"
+        "code": "MissingApiVersion",
+        "message": "The 'api-version' query parameter is required.",
+        "availableVersions": ["2024-05-25", "2024-05-01"],
+        "hint": "Add ?api-version=2024-05-25 to your request."
+    }
+}
+```
+
+### Unsupported API Version (400 Bad Request)
+
+```bash
+curl -X GET "https://notesapi-sgvx.onrender.com/notes?api-version=2020-01-01"
+```
+
+**Expected Response:**
+
+```json
+{
+    "error": {
+        "code": "UnsupportedApiVersion",
+        "message": "api-version '2020-01-01' is not supported.",
+        "availableVersions": ["2024-05-25", "2024-05-01"],
+        "hint": "Use one of: 2024-05-25, 2024-05-01"
     }
 }
 ```

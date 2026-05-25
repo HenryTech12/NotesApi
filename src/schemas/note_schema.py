@@ -9,8 +9,13 @@ class NoteBase(BaseModel):
 
     @field_validator("title", "body")
     @classmethod
-    def trim_strings(cls, v: str) -> str:
-        return v.strip()
+    def trim_strings(cls, v: Optional[str]) -> Optional[str]:
+        if isinstance(v, str):
+            trimmed = v.strip()
+            if not trimmed and v: # If it was non-empty but now empty
+                raise ValueError("Value cannot be empty or only whitespace")
+            return trimmed
+        return v
 
 class NoteUpdate(BaseModel):
     title: Optional[str] = Field(None, min_length=1, max_length=150)
