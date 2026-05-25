@@ -8,8 +8,11 @@ from src.schemas.note_schema import (
 )
 
 SUPPORTED_API_VERSIONS = ["2024-05-25", "2024-05-01"]
+DEFAULT_API_VERSION = "2024-05-25"
 
-async def verify_api_version(api_version: str = Query(..., alias="api-version")):
+async def verify_api_version(api_version: Optional[str] = Query(None, alias="api-version")):
+    if api_version is None:
+        return DEFAULT_API_VERSION
     if api_version not in SUPPORTED_API_VERSIONS:
         raise HTTPException(
             status_code=400, 

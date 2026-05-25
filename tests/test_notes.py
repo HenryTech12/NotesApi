@@ -14,7 +14,7 @@ def reset_store():
     store.seed()
 
 def test_health_check():
-    response = client.get(f"/health?api-version={API_VERSION}")
+    response = client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
 

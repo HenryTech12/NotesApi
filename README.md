@@ -23,7 +23,7 @@ A production-grade REST API built with FastAPI, strictly adhering to the **Micro
 
 ## 📋 API Overview
 
-Every request requires the `api-version` query parameter (e.g., `?api-version=2024-05-25`).
+The `api-version` query parameter is optional (defaults to `2024-05-25`).
 
 ### Example Usage & Testing
 
