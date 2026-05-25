@@ -16,10 +16,9 @@ paths:
             parameters:
                 - name: api-version
                   in: query
-                  required: false
+                  required: true
                   schema:
                       type: string
-                      default: "2024-05-25"
                       example: "2024-05-25"
             responses:
                 "200":
@@ -31,10 +30,9 @@ paths:
             parameters:
                 - name: api-version
                   in: query
-                  required: false
+                  required: true
                   schema:
                       type: string
-                      default: "2024-05-25"
                 - name: top
                   in: query
                   schema:

@@ -28,7 +28,7 @@ A production-grade REST API built with FastAPI, strictly adhering to the **Micro
 
 ## 📋 API Overview
 
-The `api-version` query parameter is optional (defaults to `2024-05-25`).
+The `api-version` query parameter is **required** for all requests.
 
 ### Example Usage & Testing
 
