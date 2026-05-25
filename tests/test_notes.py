@@ -105,6 +105,7 @@ def test_create_notes_bulk_success():
         {"title": "Bulk 1", "body": "Body 1", "tags": ["bulk"]},
         {"title": "Bulk 2", "body": "Body 2"}
     ]
+    
     response = client.post(f"/notes/bulk?api-version={API_VERSION}", json=payload)
     assert response.status_code == 201
     data = response.json()
