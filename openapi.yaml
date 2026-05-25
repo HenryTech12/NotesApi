@@ -174,7 +174,7 @@ paths:
             summary: Delete a note
             responses:
                 "200":
-                    description: OK (Note: Brief requires 200 OK for deletes)
+                    description: "OK (Note: Brief requires 200 OK for deletes)"
                     content:
                         application/json:
                             schema:
