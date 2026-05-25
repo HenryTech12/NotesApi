@@ -4,8 +4,10 @@ info:
     description: Production-grade Notes REST API following Microsoft Azure REST API Guidelines.
     version: 1.0.0
 servers:
+    - url: https://notesapi-sgvx.onrender.com
+      description: Production server
     - url: /
-      description: Dynamic server host
+      description: Dynamic server host (Local)
 
 paths:
     /health:
