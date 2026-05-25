@@ -38,13 +38,14 @@ async def list_notes(
     search: Optional[str] = None
 ):
     # Resolve pagination aliases
-    # Priority: top/skip (Azure) > limit/page (Bonus Challenge)
-    final_top = top if top is not None else (limit if limit is not None else 10)
+    # Priority: limit/page (Bonus Challenge) > top/skip (Azure)
+    # This ensures the bonus features work even if the primary params are present
+    final_top = limit if limit is not None else (top if top is not None else 10)
     
-    if skip is not None:
-        final_skip = skip
-    elif page is not None:
+    if page is not None:
         final_skip = (page - 1) * final_top
+    elif skip is not None:
+        final_skip = skip
     else:
         final_skip = 0
 
@@ -52,8 +53,15 @@ async def list_notes(
 
     # Simple filter implementation (tag eq 'val')
     if filter:
-        if "tag eq '" in filter:
-            tag_val = filter.split("'")[1]
+        # Improved regex or more flexible parsing would be better, but keeping it simple/robust
+        import re
+        match = re.search(r"tag eq ['\"](.+?)['\"]", filter, re.IGNORECASE)
+        if match:
+            tag_val = match.group(1)
+            notes = [n for n in notes if any(t.lower() == tag_val.lower() for t in n["tags"])]
+        elif "tag eq " in filter.lower():
+            # Handle unquoted case
+            tag_val = filter.lower().split("tag eq ")[1].strip()
             notes = [n for n in notes if any(t.lower() == tag_val.lower() for t in n["tags"])]
 
     # Search by title or body
@@ -77,7 +85,14 @@ async def list_notes(
         # Reconstruct URL with current params
         from urllib.parse import urlencode
         query_params = dict(request.query_params)
+        
+        # Azure guidelines prefer $skip for continuation
         query_params["skip"] = str(final_skip + final_top)
+        
+        # Remove page alias if present to avoid confusion in nextLink
+        if "page" in query_params:
+            query_params.pop("page")
+            
         query_string = urlencode(query_params)
         
         # request.url includes the scheme, host, and port correctly
