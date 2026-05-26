@@ -1,95 +1,134 @@
-# Notes API (Microsoft Azure Aligned)
+# Notes API (Secure, Multi-User, Azure Aligned)
 
 ## 🌐 Live Demo
 
 -   **Base URL:** [https://notesapi-sgvx.onrender.com](https://notesapi-sgvx.onrender.com)
 -   **Interactive Docs:** [https://notesapi-sgvx.onrender.com/docs](https://notesapi-sgvx.onrender.com/docs)
 
-A production-grade REST API built with FastAPI, strictly adhering to the **Microsoft Azure REST API Guidelines**.
+A production-grade REST API built with FastAPI, PostgreSQL (SQLAlchemy Async), and Alembic, strictly adhering to the **Microsoft Azure REST API Guidelines**.
 
 ## 🚀 Setup & Run
 
-1. **Install Dependencies:**
+1. **Environment Config:**
+   Copy `.env.example` to `.env` and fill in your values.
+
+    ```bash
+    cp .env.example .env
+    ```
+
+2. **Install Dependencies:**
 
     ```bash
     pip install -r requirements.txt
     ```
 
-2. **Start the Server:**
+3. **Database Migrations:**
 
+    ```bash
+    alembic upgrade head
+    ```
+
+4. **Start the Server:**
     ```bash
     python src/main.py
     ```
 
-3. **Run Tests:**
-    ```bash
-    PYTHONPATH=$PWD pytest -v
-    ```
-
 ## 📋 API Overview
 
-The `api-version` query parameter is **required** for all requests.
+The `api-version` query parameter is **required** for all requests. Authentication uses JWT Bearer tokens.
 
-### Example Usage & Testing
+### 🔐 Authentication Flow
 
-To test the API and capture "screenshots" for your submission, run these commands in your terminal while the server is active:
-
-1. **Health Check** (Verifies connectivity):
+1. **Register User:**
 
     ```bash
-    curl -i "https://notesapi-sgvx.onrender.com/health?api-version=2024-05-25"
-    ```
-
-2. **List Notes** (Shows pagination & Azure headers):
-
-    ```bash
-    curl -i "https://notesapi-sgvx.onrender.com/notes?api-version=2024-05-25&top=2"
-    ```
-
-3. **Create Note** (Tests validation & creation):
-    ```bash
-    curl -i -X POST "https://notesapi-sgvx.onrender.com/notes?api-version=2024-05-25" \
+    curl -i -X POST "http://localhost:3000/auth/register?api-version=2024-05-25" \
          -H "Content-Type: application/json" \
-         -d '{"title": "Submission Note", "body": "API is fully functional and compliant."}'
+         -d '{"email": "user@example.com", "password": "Password123!"}'
     ```
 
-**Screenshots:**
-High-resolution screenshots showing the request/response cycle for each endpoint can be found in the [postman-screenshots/](postman-screenshots/) directory.
+2. **Login:**
 
-| Method | Endpoint      | Description                                   | Status Code |
-| ------ | ------------- | --------------------------------------------- | ----------- |
-| GET    | `/notes`      | List with `top`, `skip`, `filter`, `orderby`. | 200 OK      |
-| POST   | `/notes`      | Create a new note.                            | 201 Created |
-| POST   | `/notes/bulk` | Ingest multiple notes.                        | 201 Created |
-| GET    | `/notes/{id}` | Retrieve a specific note.                     | 200 OK      |
-| PATCH  | `/notes/{id}` | Partially update a note.                      | 200 OK      |
-| PUT    | `/notes/{id}` | Replace a note entirely.                      | 200 OK      |
-| DELETE | `/notes/{id}` | Remove a note.                                | 200 OK      |
+    ```bash
+    curl -i -X POST "http://localhost:3000/auth/login?api-version=2024-05-25" \
+         -H "Content-Type: application/json" \
+         -d '{"email": "user@example.com", "password": "Password123!"}'
+    ```
 
-### 🔧 Full Testing Guide
+3. **Refresh Token:**
 
-For a complete set of cURL commands covering all success and error scenarios (PUT, PATCH, DELETE, and Validation Errors), see the **[Full cURL Testing Guide →](artifacts/testing_guide.md)**.
+    ```bash
+    curl -i -X POST "http://localhost:3000/auth/refresh?api-version=2024-05-25" \
+         -H "Content-Type: application/json" \
+         -d '{"refreshToken": "your-refresh-token"}'
+    ```
+
+4. **Logout:**
+
+    ```bash
+    curl -i -X POST "http://localhost:3000/auth/logout?api-version=2024-05-25" \
+         -H "Authorization: Bearer your-access-token" \
+         -H "Content-Type: application/json" \
+         -d '{"refreshToken": "your-refresh-token"}'
+    ```
+
+5. **Forgot Password:**
+
+    ```bash
+    curl -i -X POST "http://localhost:3000/auth/forgot-password?api-version=2024-05-25" \
+         -H "Content-Type: application/json" \
+         -d '{"email": "user@example.com"}'
+    ```
+
+6. **Reset Password:**
+    ```bash
+    curl -i -X POST "http://localhost:3000/auth/reset-password?api-version=2024-05-25" \
+         -H "Content-Type: application/json" \
+         -d '{"resetToken": "token-from-response", "newPassword": "NewPassword123!"}'
+    ```
+
+### 🗒️ Notes Management (Requires Auth)
+
+-   **List My Notes:**
+
+    ```bash
+    curl -i -H "Authorization: Bearer <TOKEN>" "http://localhost:3000/notes?api-version=2024-05-25"
+    ```
+
+-   **Create Note:**
+    ```bash
+    curl -i -X POST -H "Authorization: Bearer <TOKEN>" \
+         -H "Content-Type: application/json" \
+         -d '{"title": "Secure Note", "body": "This is a private note.", "tags": ["private"]}' \
+         "http://localhost:3000/notes?api-version=2024-05-25"
+    ```
 
 ## 🔄 Idempotency
 
-As per [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Glossary/Idempotent), an idempotent HTTP method is one that can be called many times without different outcomes.
+| Method | Endpoint               | Idempotent | Reason                                       |
+| ------ | ---------------------- | ---------- | -------------------------------------------- |
+| POST   | `/auth/register`       | No         | Creates a new user record.                   |
+| POST   | `/auth/login`          | No         | Generates new session/refresh tokens.        |
+| POST   | `/auth/refresh`        | No         | Rotates/invalidates old tokens.              |
+| POST   | `/auth/logout`         | Yes        | Revokes token state; repeats result in same. |
+| POST   | `/auth/reset-password` | No         | Changes state and invalidates tokens.        |
+| GET    | `/notes`               | Yes        | Only retrieves data.                         |
+| PUT    | `/notes/{id}`          | Yes        | Replaces resource entirely.                  |
+| DELETE | `/notes/{id}`          | Yes        | Resource removal is idempotent.              |
 
-| Method | Idempotent | Reason                                                                             |
-| ------ | ---------- | ---------------------------------------------------------------------------------- |
-| GET    | Yes        | Safe method; only retrieves data.                                                  |
-| PUT    | Yes        | Replacing a resource with the same data multiple times results in the same state.  |
-| DELETE | Yes        | Deleting a resource results in the same final state (resource gone).               |
-| PATCH  | Yes        | This implementation is idempotent; sending the same PATCH produces the same state. |
-| POST   | No         | Multiple POST calls will create multiple separate resources.                       |
+## 🛠️ Security Decisions
 
-## 🛠️ Engineering Excellence
+-   **Bcrypt (Work Factor 12):** Provides strong protection against brute-force attacks while maintaining acceptable performance.
+-   **Short-lived Access Tokens (15min):** Minimizes the window of opportunity if a token is stolen.
+-   **Refresh Token Rotation:** Every refresh issues a new token and revokes the old one, detecting potential theft if an old token is reused.
+-   **Timing Attack Protection:** On login, we always perform a bcrypt verification (using a dummy hash if the email is unknown) to ensure responses take a similar amount of time.
+-   **SHA-256 Hashing for Tokens:** Refresh and Reset tokens are never stored in plaintext in the database.
 
--   **Azure Compliance**: Mandatory versioning, standardized error envelopes, and `x-ms-request-id` header injection.
--   **Advanced Querying**: Support for OData-style filters and absolute `nextLink` pagination.
--   **Observability**: Custom ANSI color-coded middleware for terminal-based request tracking.
+## 📐 Engineering Excellence
 
-## 🧪 Testing & Seed Data
-
-The application automatically boots up with **3 pre-seeded notes** via `store.seed()`. This allows judges and developers to immediately test pagination, sorting, and filtering parameters without manually creating data first.
+-   **SQLAlchemy Async:** Non-blocking database operations for high concurrency.
+-   **Alembic Migrations:** Structured, versioned database schema evolution.
+-   **Azure Compliance:** Mandatory versioning, standardized `error` envelope, and `x-ms-request-id` header injection.
+-   **RBAC:** Admin users have elevated privileges to manage all users and notes.
 
 _Built for the IEEE x GitHub Campus Experts Codeathon._

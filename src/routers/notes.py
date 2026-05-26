@@ -1,9 +1,13 @@
 # src/routers/notes.py
-from fastapi import APIRouter, HTTPException, Query, status, Request, Depends, Response
+from fastapi import APIRouter, HTTPException, Query, status, Request, Depends
 from typing import Optional, List
-from src.utils.store import store
+from src.database import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from src.models.user import User
+from src.middleware.auth_middleware import get_current_user
+from src.services.note_service import NoteService
 from src.schemas.note_schema import (
-    Note, NoteBase, NoteUpdate, 
+    Note as NoteSchema, NoteBase, NoteUpdate, 
     NoteListResponse, NoteBulkResponse
 )
 
@@ -36,7 +40,7 @@ async def verify_api_version(api_version: Optional[str] = Query(None, alias="api
 router = APIRouter(
     prefix="/notes", 
     tags=["notes"],
-    dependencies=[Depends(verify_api_version)]
+    dependencies=[Depends(verify_api_version), Depends(get_current_user)]
 )
 
 @router.get("", response_model=NoteListResponse)
@@ -46,13 +50,12 @@ async def list_notes(
     skip: Optional[int] = Query(None, ge=0),
     limit: Optional[int] = Query(None, ge=1, le=100),
     page: Optional[int] = Query(None, ge=1),
-    orderby: str = Query("createdAt desc"), # Azure uses space-separated desc/asc
-    filter: Optional[str] = Query(None), # e.g. "tag eq 'work'"
-    search: Optional[str] = None
+    orderby: str = Query("created_at desc"), 
+    filter: Optional[str] = Query(None), 
+    search: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    # Resolve pagination aliases
-    # Priority: limit/page (Bonus Challenge) > top/skip (Azure)
-    # This ensures the bonus features work even if the primary params are present
     final_top = limit if limit is not None else (top if top is not None else 10)
     
     if page is not None:
@@ -62,130 +65,92 @@ async def list_notes(
     else:
         final_skip = 0
 
-    notes = store.find_all()
-
-    # Simple filter implementation (tag eq 'val')
-    if filter:
-        # Improved regex or more flexible parsing would be better, but keeping it simple/robust
-        import re
-        match = re.search(r"tag eq ['\"](.+?)['\"]", filter, re.IGNORECASE)
-        if match:
-            tag_val = match.group(1)
-            notes = [n for n in notes if any(t.lower() == tag_val.lower() for t in n["tags"])]
-        elif "tag eq " in filter.lower():
-            # Handle unquoted case
-            tag_val = filter.lower().split("tag eq ")[1].strip()
-            notes = [n for n in notes if any(t.lower() == tag_val.lower() for t in n["tags"])]
-
-    # Search by title or body
-    if search:
-        search_lower = search.lower()
-        notes = [n for n in notes if search_lower in n["title"].lower() or search_lower in n["body"].lower()]
-
-    # Sorting (orderby=field [asc|desc])
-    if orderby:
-        parts = orderby.split()
-        sort_field = parts[0]
-        reverse = parts[1].lower() == "desc" if len(parts) > 1 else False
-        notes.sort(key=lambda x: x.get(sort_field, ""), reverse=reverse)
-
-    total = len(notes)
-    data = notes[final_skip : final_skip + final_top]
+    notes, total = await NoteService.list_notes(
+        db, current_user, top=final_top, skip=final_skip, filter_str=filter, search=search, orderby=orderby, is_admin=(current_user.role == "admin")
+    )
     
-    # nextLink generation following Azure pattern (absolute URL)
     next_link = None
     if final_skip + final_top < total:
-        # Reconstruct URL with current params
         from urllib.parse import urlencode
         query_params = dict(request.query_params)
-        
-        # Azure guidelines prefer $skip for continuation
         query_params["skip"] = str(final_skip + final_top)
-        
-        # Remove page alias if present to avoid confusion in nextLink
         if "page" in query_params:
             query_params.pop("page")
-            
         query_string = urlencode(query_params)
-        
-        # request.url includes the scheme, host, and port correctly
         base_url = str(request.url).split('?')[0]
         next_link = f"{base_url}?{query_string}"
 
     return {
-        "value": data,
+        "value": notes,
         "nextLink": next_link
     }
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=Note)
+@router.post("", status_code=status.HTTP_201_CREATED, response_model=NoteSchema)
 async def create_note(
-    note_data: NoteBase
+    note_data: NoteBase,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    note = store.create(
-        title=note_data.title, 
-        body=note_data.body, 
-        tags=note_data.tags
+    return await NoteService.create_note(
+        db, current_user.id, title=note_data.title, body=note_data.body, tags=note_data.tags
     )
-    return note
 
 @router.post("/bulk", status_code=status.HTTP_201_CREATED, response_model=NoteBulkResponse)
 async def create_notes_bulk(
-    notes_data: List[NoteBase]
+    notes_data: List[NoteBase],
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    created_notes = []
-    for note_data in notes_data:
-        note = store.create(
-            title=note_data.title,
-            body=note_data.body,
-            tags=note_data.tags
-        )
-        created_notes.append(note)
-    return {"value": created_notes}
+    created = await NoteService.create_notes_bulk(db, current_user.id, notes_data)
+    return {"value": created}
 
-@router.get("/{id}", response_model=Note)
+@router.get("/{id}", response_model=NoteSchema)
 async def get_note(
-    id: str
+    id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    note = store.find_by_id(id)
+    note = await NoteService.get_note(db, id, current_user, is_admin=(current_user.role == "admin"))
     if not note:
         raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
     return note
 
-@router.put("/{id}", response_model=Note)
+@router.put("/{id}", response_model=NoteSchema)
 async def replace_note(
     id: str, 
-    note_data: NoteBase
+    note_data: NoteBase,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    note = store.replace(
-        id, 
-        title=note_data.title, 
-        body=note_data.body, 
-        tags=note_data.tags
+    note = await NoteService.update_note(
+        db, id, current_user, note_data.model_dump(), is_admin=(current_user.role == "admin")
     )
     if not note:
         raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
     return note
 
-@router.patch("/{id}", response_model=Note)
+@router.patch("/{id}", response_model=NoteSchema)
 async def patch_note(
     id: str, 
-    note_data: NoteUpdate
+    note_data: NoteUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     patch_fields = note_data.model_dump(exclude_unset=True)
-    
-    note = store.patch(id, patch_fields)
+    note = await NoteService.update_note(
+        db, id, current_user, patch_fields, is_admin=(current_user.role == "admin")
+    )
     if not note:
         raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
     return note
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_note(
-    id: str
+    id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    # The brief explicitly requires 200 OK for deletes.
-    # We first check if the resource exists to satisfy strict 404 requirements for non-existent IDs.
-    deleted = store.remove(id)
+    deleted = await NoteService.delete_note(db, id, current_user, is_admin=(current_user.role == "admin"))
     if not deleted:
         raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
-    
     return {"message": f"Note with id {id} deleted successfully."}

@@ -1,11 +1,12 @@
 # src/main.py
 import yaml
+import os
 from fastapi import FastAPI, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from src.routers import notes
+from src.routers import notes, auth, admin
 from src.routers.notes import verify_api_version
 from src.middleware.logger import AzureTelemetryMiddleware
 from src.middleware.error_handler import (
@@ -13,12 +14,17 @@ from src.middleware.error_handler import (
     http_exception_handler, 
     validation_exception_handler
 )
-from src.utils.store import store
+
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
+# Verify JWT Secret
+JWT_SECRET = os.getenv("JWT_SECRET")
+if not JWT_SECRET or len(JWT_SECRET) < 32:
+    raise ValueError("JWT_SECRET environment variable is missing or less than 32 characters.")
 
 app = FastAPI(title="Notes API", version="1.0.0")
-
-# Seed data
-store.seed()
 
 # Middleware
 app.add_middleware(
@@ -58,10 +64,11 @@ app.openapi = custom_openapi
 async def health_check():
     return {"status": "ok"}
 
+app.include_router(auth.router)
 app.include_router(notes.router)
+app.include_router(admin.router)
 
 if __name__ == "__main__":
     import uvicorn
-    import os
     port = int(os.environ.get("PORT", 3000))
     uvicorn.run(app, host="0.0.0.0", port=port)
