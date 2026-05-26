@@ -101,7 +101,9 @@ class NoteService:
             if key in allowed_keys:
                 setattr(note, key, value)
         
-        note.updated_at = func.now()
+        # Use a plain datetime for updated_at to avoid func.now() issues with some drivers/states
+        from datetime import datetime
+        note.updated_at = datetime.utcnow()
         await db.flush()
         return note
 
