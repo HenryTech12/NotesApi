@@ -213,6 +213,12 @@ paths:
             tags: [notes]
             security:
                 - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
             requestBody:
                 required: true
                 content:
@@ -240,6 +246,12 @@ paths:
             tags: [notes]
             security:
                 - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
             responses:
                 "200":
                     description: OK
@@ -353,6 +365,12 @@ paths:
             tags: [admin]
             security:
                 - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
             responses:
                 "200":
                     description: OK
