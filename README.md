@@ -137,6 +137,64 @@ The `api-version` query parameter is **required** for all requests. Authenticati
          "http://localhost:3000/notes/{id}?api-version=2024-05-25"
     ```
 
+### 🛡️ Admin Features (Admin Role Only)
+
+Admin users can manage the entire system. You can create an admin using `python scripts/create_admin.py --email admin@example.com --password "SecurePass123!"`.
+
+-   **List All Users:**
+
+    ```bash
+    curl -i -H "Authorization: Bearer <ADMIN_TOKEN>" \
+         "https://notesapi-sgvx.onrender.com/admin/users?api-version=2024-05-25"
+    ```
+
+-   **Get User Details:**
+
+    ```bash
+    curl -i -H "Authorization: Bearer <ADMIN_TOKEN>" \
+         "https://notesapi-sgvx.onrender.com/admin/users/{userId}?api-version=2024-05-25"
+    ```
+
+-   **Flag a User (Suspend their access):**
+
+    ```bash
+    curl -i -X PATCH -H "Authorization: Bearer <ADMIN_TOKEN>" \
+         -H "Content-Type: application/json" \
+         -d '{"isFlagged": true}' \
+         "https://notesapi-sgvx.onrender.com/admin/users/{userId}/flag?api-version=2024-05-25"
+    ```
+
+-   **Unflag a User (Restore their access):**
+
+    ```bash
+    curl -i -X PATCH -H "Authorization: Bearer <ADMIN_TOKEN>" \
+         -H "Content-Type: application/json" \
+         -d '{"isFlagged": false}' \
+         "https://notesapi-sgvx.onrender.com/admin/users/{userId}/flag?api-version=2024-05-25"
+    ```
+
+-   **Change a User's Role (Upgrade to Admin):**
+
+    ```bash
+    curl -i -X PATCH -H "Authorization: Bearer <ADMIN_TOKEN>" \
+         -H "Content-Type: application/json" \
+         -d '{"role": "admin"}' \
+         "https://notesapi-sgvx.onrender.com/admin/users/{userId}/role?api-version=2024-05-25"
+    ```
+
+-   **View ALL Notes in the System (Privacy Override):**
+
+    ```bash
+    curl -i -H "Authorization: Bearer <ADMIN_TOKEN>" \
+         "https://notesapi-sgvx.onrender.com/admin/notes?api-version=2024-05-25"
+    ```
+
+-   **Delete a User (and all their notes):**
+    ```bash
+    curl -i -X DELETE -H "Authorization: Bearer <ADMIN_TOKEN>" \
+         "https://notesapi-sgvx.onrender.com/admin/users/{userId}?api-version=2024-05-25"
+    ```
+
 ## 🔄 Idempotency
 
 | Method | Endpoint               | Idempotent | Reason                                       |
@@ -163,6 +221,7 @@ The `api-version` query parameter is **required** for all requests. Authenticati
 -   **SQLAlchemy Async:** Non-blocking database operations for high concurrency.
 -   **Alembic Migrations:** Structured, versioned database schema evolution.
 -   **Azure Compliance:** Mandatory versioning, standardized `error` envelope, and `x-ms-request-id` header injection.
--   **RBAC:** Admin users have elevated privileges to manage all users and notes.
+-   **RBAC (Role-Based Access Control):** Admin users have elevated privileges to manage all users and notes, including account suspension (flagging), role modification, and system-wide note visibility.
+-   **Automated Testing:** Robust test suite covering critical paths like JWT rotation, RBAC enforcement, and data isolation.
 
 _Built for the IEEE x GitHub Campus Experts Codeathon._
