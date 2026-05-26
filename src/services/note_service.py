@@ -96,8 +96,10 @@ class NoteService:
             return None
             
         for key, value in data.items():
-            setattr(note, key, value)
-            
+            if hasattr(note, key):
+                setattr(note, key, value)
+        
+        note.updated_at = func.now() # Manually trigger update time
         await db.flush()
         return note
 

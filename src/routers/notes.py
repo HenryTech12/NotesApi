@@ -137,6 +137,8 @@ async def patch_note(
     current_user: User = Depends(get_current_user)
 ):
     patch_fields = note_data.model_dump(exclude_unset=True)
+    # The note_schema.py uses NoteUpdate which maps to snake_case for model_dump by default
+    # But let's check if there's any confusion with camelCase in the field names
     note = await NoteService.update_note(
         db, id, current_user, patch_fields, is_admin=(current_user.role == "admin")
     )

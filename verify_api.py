@@ -104,7 +104,22 @@ def test_api():
     if r.status_code != 200:
         sys.exit(1)
 
-    print("\nALL TESTS PASSED SUCCESSFULLY INCLUDING BULK, PATCH, AND DELETE!")
+    # 9. PUT Note
+    print("\nTesting /notes (Create for PUT)...")
+    r = client.post(
+        f"/notes?api-version={API_VERSION}",
+        json={"title": "To be replaced", "body": "Original body"},
+        headers=headers
+    )
+    put_id = r.json()["id"]
+    print(f"Testing /notes/{put_id} (Put)...")
+    r = client.put(
+        f"/notes/{put_id}?api-version={API_VERSION}",
+        json={"title": "Replaced Title", "body": "Replaced Body", "tags": ["replacement"]},
+        headers=headers
+    )
+    print(f"Status: {r.status_code}, Body: {r.json()}")
+    if r.status_code != 200:
+        sys.exit(1)
 
-if __name__ == "__main__":
-    test_api()
+    print("\nALL TESTS PASSED SUCCESSFULLY INCLUDING BULK, PATCH, DELETE AND PUT!")
