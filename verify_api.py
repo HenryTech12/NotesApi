@@ -2,7 +2,7 @@ import httpx
 import sys
 import random
 
-BASE_URL = "http://localhost:3000"
+BASE_URL = "https://notesapi-sgvx.onrender.com"
 API_VERSION = "2024-05-25"
 
 def test_api():
@@ -123,3 +123,6 @@ def test_api():
         sys.exit(1)
 
     print("\nALL TESTS PASSED SUCCESSFULLY INCLUDING BULK, PATCH, DELETE AND PUT!")
+
+if __name__ == "__main__":
+    test_api()

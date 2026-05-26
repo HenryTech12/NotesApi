@@ -90,16 +90,18 @@ class NoteService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    @staticmethod
     async def update_note(db: AsyncSession, note_id: str, user: User, data: dict, is_admin: bool = False) -> Optional[Note]:
         note = await NoteService.get_note(db, note_id, user, is_admin)
         if not note:
             return None
             
+        allowed_keys = {"title", "body", "tags"}
         for key, value in data.items():
-            if hasattr(note, key):
+            if key in allowed_keys:
                 setattr(note, key, value)
         
-        note.updated_at = func.now() # Manually trigger update time
+        note.updated_at = func.now()
         await db.flush()
         return note
 
