@@ -68,7 +68,43 @@ def test_api():
     if r.status_code != 200:
         sys.exit(1)
         
-    print("\nALL BASIC TESTS PASSED SUCCESSFULLY!")
+    # 6. Bulk Create
+    print("\nTesting /notes/bulk (Bulk)...")
+    bulk_payload = [
+        {"title": "Bulk Note 1", "body": "Body 1"},
+        {"title": "Bulk Note 2", "body": "Body 2"}
+    ]
+    r = client.post(
+        f"/notes/bulk?api-version={API_VERSION}",
+        json=bulk_payload,
+        headers=headers
+    )
+    print(f"Status: {r.status_code}, Body: {r.json()}")
+    if r.status_code != 201:
+        sys.exit(1)
+
+    # 7. Patch Note
+    print(f"\nTesting /notes/{note_id} (Patch)...")
+    r = client.patch(
+        f"/notes/{note_id}?api-version={API_VERSION}",
+        json={"title": "Patched Live Title"},
+        headers=headers
+    )
+    print(f"Status: {r.status_code}, Body: {r.json()}")
+    if r.status_code != 200:
+        sys.exit(1)
+
+    # 8. Delete Note
+    print(f"\nTesting /notes/{note_id} (Delete)...")
+    r = client.delete(
+        f"/notes/{note_id}?api-version={API_VERSION}",
+        headers=headers
+    )
+    print(f"Status: {r.status_code}, Body: {r.json()}")
+    if r.status_code != 200:
+        sys.exit(1)
+
+    print("\nALL TESTS PASSED SUCCESSFULLY INCLUDING BULK, PATCH, AND DELETE!")
 
 if __name__ == "__main__":
     test_api()

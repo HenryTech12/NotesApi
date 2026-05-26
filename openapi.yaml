@@ -247,8 +247,105 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/Note"
+
+        put:
+            summary: Replace a note (PUT)
+            tags: [notes]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NoteInput"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Note"
                 "404":
                     $ref: "#/components/responses/NotFound"
+
+        patch:
+            summary: Partially update a note (PATCH)
+            tags: [notes]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/NoteUpdate"
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Note"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+        delete:
+            summary: Delete a note
+            tags: [notes]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /notes/bulk:
+        post:
+            summary: Create multiple notes in bulk
+            tags: [notes]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                $ref: "#/components/schemas/NoteInput"
+            responses:
+                "201":
+                    description: Created
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoteBulkResponse"
 
     /admin/users:
         get:
@@ -368,6 +465,26 @@ components:
                     type: array
                     items:
                         type: string
+
+        NoteUpdate:
+            type: object
+            properties:
+                title:
+                    type: string
+                body:
+                    type: string
+                tags:
+                    type: array
+                    items:
+                        type: string
+
+        NoteBulkResponse:
+            type: object
+            properties:
+                value:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Note"
 
         NoteListResponse:
             type: object
