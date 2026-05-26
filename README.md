@@ -96,11 +96,45 @@ The `api-version` query parameter is **required** for all requests. Authenticati
     ```
 
 -   **Create Note:**
+
     ```bash
     curl -i -X POST -H "Authorization: Bearer <TOKEN>" \
          -H "Content-Type: application/json" \
          -d '{"title": "Secure Note", "body": "This is a private note.", "tags": ["private"]}' \
          "http://localhost:3000/notes?api-version=2024-05-25"
+    ```
+
+-   **Bulk Create Notes:**
+
+    ```bash
+    curl -i -X POST -H "Authorization: Bearer <TOKEN>" \
+         -H "Content-Type: application/json" \
+         -d '[{"title": "Note 1", "body": "Body 1"}, {"title": "Note 2", "body": "Body 2"}]' \
+         "http://localhost:3000/notes/bulk?api-version=2024-05-25"
+    ```
+
+-   **Update Note (PUT):**
+
+    ```bash
+    curl -i -X PUT -H "Authorization: Bearer <TOKEN>" \
+         -H "Content-Type: application/json" \
+         -d '{"title": "Replaced Title", "body": "New full body content"}' \
+         "http://localhost:3000/notes/{id}?api-version=2024-05-25"
+    ```
+
+-   **Partial Update (PATCH):**
+
+    ```bash
+    curl -i -X PATCH -H "Authorization: Bearer <TOKEN>" \
+         -H "Content-Type: application/json" \
+         -d '{"title": "New Title Only"}' \
+         "http://localhost:3000/notes/{id}?api-version=2024-05-25"
+    ```
+
+-   **Delete Note:**
+    ```bash
+    curl -i -X DELETE -H "Authorization: Bearer <TOKEN>" \
+         "http://localhost:3000/notes/{id}?api-version=2024-05-25"
     ```
 
 ## 🔄 Idempotency
