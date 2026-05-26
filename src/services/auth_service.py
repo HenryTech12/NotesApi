@@ -26,10 +26,29 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7))
 RESET_TOKEN_EXPIRE_MINUTES = int(os.getenv("RESET_TOKEN_EXPIRE_MINUTES", 60))
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    # Pre-hash with SHA-256 to overcome bcrypt's 72-character limit
+    # and then hash with bcrypt.
+    pre_hashed = hashlib.sha256(password.encode()).hexdigest()
+    return pwd_context.hash(pre_hashed)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    # 1. Try verifying as a pre-hashed password (new approach)
+    pre_hashed = hashlib.sha256(plain_password.encode()).hexdigest()
+    try:
+        if pwd_context.verify(pre_hashed, hashed_password):
+            return True
+    except Exception:
+        pass
+
+    # 2. Try verifying as a plain password (backward compatibility for old hashes)
+    # Only try if the password is within bcrypt's 72-byte limit to avoid ValueError
+    try:
+        if len(plain_password.encode()) <= 72:
+            return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        pass
+
+    return False
 
 def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
