@@ -55,7 +55,7 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     email: str
     role: str
-    createdAt: datetime
+    created_at: datetime
 
     class Config:
         from_attributes = True
@@ -64,7 +64,7 @@ class UserResponse(BaseModel):
         )
         populate_by_name = True
 
-    @field_validator("createdAt", mode="before")
+    @field_validator("created_at", mode="before")
     @classmethod
     def format_datetime(cls, v):
         if isinstance(v, datetime):

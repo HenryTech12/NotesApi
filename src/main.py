@@ -21,8 +21,8 @@ load_dotenv()
 
 # Verify JWT Secret
 JWT_SECRET = os.getenv("JWT_SECRET")
-if not JWT_SECRET or len(JWT_SECRET) < 32:
-    raise ValueError("JWT_SECRET environment variable is missing or less than 32 characters.")
+if not JWT_SECRET or len(JWT_SECRET) < 16:
+    raise ValueError("JWT_SECRET environment variable is missing or less than 16 characters.")
 
 app = FastAPI(title="Notes API", version="1.0.0")
 

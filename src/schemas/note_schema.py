@@ -35,10 +35,20 @@ class NoteUpdate(BaseModel):
             raise ValueError("At least one of [title, body, tags] must be provided.")
         return self
 
+import uuid
+from datetime import datetime
+
 class Note(NoteBase):
-    id: str
-    createdAt: str
-    updatedAt: str
+    id: uuid.UUID
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+        alias_generator = lambda s: "".join(
+            word.capitalize() if i > 0 else word for i, word in enumerate(s.split("_"))
+        )
+        populate_by_name = True
 
 # Response Shapes following Azure guidelines (Direct resource or 'value' for collections)
 # Note: x-ms-request-id is handled in middleware headers
