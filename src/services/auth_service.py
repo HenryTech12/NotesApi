@@ -5,15 +5,12 @@ import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 from jose import JWTError, jwt
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.models.user import User, RefreshToken, PasswordResetToken
 from src.schemas.auth_schema import TokenResponse
 from fastapi import HTTPException, status
-
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT configuration
 JWT_SECRET = os.getenv("JWT_SECRET")
@@ -26,25 +23,34 @@ REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7))
 RESET_TOKEN_EXPIRE_MINUTES = int(os.getenv("RESET_TOKEN_EXPIRE_MINUTES", 60))
 
 def hash_password(password: str) -> str:
-    # Pre-hash with SHA-256 to overcome bcrypt's 72-character limit
-    # and then hash with bcrypt.
-    pre_hashed = hashlib.sha256(password.encode()).hexdigest()
-    return pwd_context.hash(pre_hashed)
+    # Use bcrypt directly to avoid passlib's compatibility issues with newer bcrypt versions in Python 3.14.
+    # We pre-hash with SHA-256 to overcome bcrypt's 72-byte limit.
+    pw_bytes = password.encode('utf-8')
+    pre_hashed = hashlib.sha256(pw_bytes).hexdigest().encode('utf-8')
+    
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(pre_hashed, salt).decode('utf-8')
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    # 1. Try verifying as a pre-hashed password (new approach)
-    pre_hashed = hashlib.sha256(plain_password.encode()).hexdigest()
+    pw_bytes = plain_password.encode('utf-8')
     try:
-        if pwd_context.verify(pre_hashed, hashed_password):
+        hashed_bytes = hashed_password.encode('utf-8')
+    except Exception:
+        return False
+
+    # 1. Try with the new pre-hashing approach (SHA-256 hex digest)
+    pre_hashed = hashlib.sha256(pw_bytes).hexdigest().encode('utf-8')
+    try:
+        if bcrypt.checkpw(pre_hashed, hashed_bytes):
             return True
     except Exception:
         pass
 
-    # 2. Try verifying as a plain password (backward compatibility for old hashes)
-    # Only try if the password is within bcrypt's 72-byte limit to avoid ValueError
+    # 2. Try with raw password (backward compatibility for old hashes < 72 bytes)
     try:
-        if len(plain_password.encode()) <= 72:
-            return pwd_context.verify(plain_password, hashed_password)
+        if len(pw_bytes) <= 72:
+            if bcrypt.checkpw(pw_bytes, hashed_bytes):
+                return True
     except Exception:
         pass
 
