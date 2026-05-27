@@ -358,7 +358,186 @@ paths:
                         application/json:
                             schema:
                                 $ref: "#/components/schemas/NoteBulkResponse"
+    /admin/users:
+        get:
+            summary: List all users (Admin only)
+            tags: [admin]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+                - name: top
+                  in: query
+                  schema:
+                      type: integer
+                      default: 10
+                - name: skip
+                  in: query
+                  schema:
+                      type: integer
+                      default: 0
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: "#/components/schemas/UserResponse"
 
+    /admin/users/{id}:
+        parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                  type: string
+        get:
+            summary: Get user details (Admin only)
+            tags: [admin]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserResponse"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+        delete:
+            summary: Delete a user (Admin only)
+            tags: [admin]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /admin/users/{id}/role:
+        patch:
+            summary: Change user role (Admin only)
+            tags: [admin]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                role:
+                                    type: string
+                                    enum: [admin, user]
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserResponse"
+
+    /admin/users/{id}/flag:
+        patch:
+            summary: Flag/unflag a user (Admin only)
+            tags: [admin]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: string
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                isFlagged:
+                                    type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/UserResponse"
+
+    /admin/notes:
+        get:
+            summary: List all notes across all users (Admin only)
+            tags: [admin]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+                - name: top
+                  in: query
+                  schema:
+                      type: integer
+                - name: skip
+                  in: query
+                  schema:
+                      type: integer
+                - name: filter
+                  in: query
+                  schema:
+                      type: string
+                - name: orderby
+                  in: query
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/NoteListResponse"
     /admin/users:
         get:
             summary: List all users (Admin only)
@@ -446,6 +625,8 @@ components:
                     type: string
                 role:
                     type: string
+                isFlagged:
+                    type: boolean
                 createdAt:
                     type: string
                     format: date-time

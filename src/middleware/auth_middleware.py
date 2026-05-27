@@ -1,5 +1,6 @@
 # src/middleware/auth_middleware.py
 import os
+import uuid
 from fastapi import Request, HTTPException, status, Depends
 from jose import JWTError, jwt
 from sqlalchemy import select
@@ -22,14 +23,15 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
     token = auth_header.split(" ")[1]
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        user_id = payload.get("sub")
-        if user_id is None:
+        user_id_str = payload.get("sub")
+        if user_id_str is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail={"code": "Unauthorized", "message": "Invalid token payload."},
                 headers={"x-ms-error-code": "Unauthorized"}
             )
-    except JWTError:
+        user_id = uuid.UUID(user_id_str)
+    except (JWTError, ValueError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "Unauthorized", "message": "Token expired or invalid."},
@@ -45,6 +47,13 @@ async def get_current_user(request: Request, db: AsyncSession = Depends(get_db))
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "Unauthorized", "message": "User not found."},
             headers={"x-ms-error-code": "Unauthorized"}
+        )
+    
+    if user.is_flagged:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={"code": "AccountSuspended", "message": "Your account has been flagged and suspended. Please contact support."},
+            headers={"x-ms-error-code": "Forbidden"}
         )
     
     request.state.user = user

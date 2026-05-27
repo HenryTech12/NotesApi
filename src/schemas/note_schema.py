@@ -42,6 +42,8 @@ class Note(NoteBase):
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+    summary: Optional[str] = None
+    summary_generated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

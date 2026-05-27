@@ -2,6 +2,8 @@ fastapi
 uvicorn[standard]
 sqlalchemy[asyncio]
 asyncpg
+aiosqlite
+greenlet==3.1.1 # Required for Python 3.13 stability on Windows
 alembic
 passlib[bcrypt]
 python-jose[cryptography]
@@ -11,3 +13,4 @@ httpx
 pytest
 pytest-asyncio
 PyYAML
+python-multipart

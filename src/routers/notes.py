@@ -1,4 +1,5 @@
 # src/routers/notes.py
+import uuid
 from fastapi import APIRouter, HTTPException, Query, status, Request, Depends
 from typing import Optional, List
 from src.database import get_db
@@ -106,7 +107,7 @@ async def create_notes_bulk(
 
 @router.get("/{id}", response_model=NoteSchema)
 async def get_note(
-    id: str,
+    id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -117,7 +118,7 @@ async def get_note(
 
 @router.put("/{id}", response_model=NoteSchema)
 async def replace_note(
-    id: str, 
+    id: uuid.UUID, 
     note_data: NoteBase,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -131,7 +132,7 @@ async def replace_note(
 
 @router.patch("/{id}", response_model=NoteSchema)
 async def patch_note(
-    id: str, 
+    id: uuid.UUID, 
     note_data: NoteUpdate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -148,7 +149,7 @@ async def patch_note(
 
 @router.delete("/{id}", status_code=status.HTTP_200_OK)
 async def delete_note(
-    id: str,
+    id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -156,3 +157,30 @@ async def delete_note(
     if not deleted:
         raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
     return {"message": f"Note with id {id} deleted successfully."}
+
+
+@router.post("/{id}/summary", response_model=NoteSchema)
+async def generate_summary_for_note(
+    id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    # Attempts to generate or return cached summary; resilient on failures
+    note = await NoteService.generate_summary(db, id, current_user, is_admin=(current_user.role == "admin"))
+    if note is None:
+        raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
+    return note
+
+
+@router.post("/{id}/auto_tags", response_model=NoteSchema)
+async def auto_tag_note(
+    id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    tags = await NoteService.suggest_tags(db, id, current_user, is_admin=(current_user.role == "admin"))
+    if tags is None:
+        raise HTTPException(status_code=404, detail=f"Note with id {id} not found.")
+    # Return the updated note
+    note = await NoteService.get_note(db, id, current_user, is_admin=(current_user.role == "admin"))
+    return note

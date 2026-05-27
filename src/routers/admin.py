@@ -1,4 +1,5 @@
 # src/routers/admin.py
+import uuid
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -29,7 +30,7 @@ async def list_users(
     return list(result.scalars().all())
 
 @router.get("/users/{id}", response_model=UserResponse)
-async def get_user(id: str, db: AsyncSession = Depends(get_db)):
+async def get_user(id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     stmt = select(User).where(User.id == id)
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
@@ -38,7 +39,7 @@ async def get_user(id: str, db: AsyncSession = Depends(get_db)):
     return user
 
 @router.delete("/users/{id}")
-async def delete_user(id: str, db: AsyncSession = Depends(get_db)):
+async def delete_user(id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     stmt = select(User).where(User.id == id)
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
@@ -73,7 +74,7 @@ async def list_all_notes(
     return {"value": notes, "nextLink": next_link}
 
 @router.patch("/users/{id}/role", response_model=UserResponse)
-async def change_role(id: str, role_data: dict, db: AsyncSession = Depends(get_db)):
+async def change_role(id: uuid.UUID, role_data: dict, db: AsyncSession = Depends(get_db)):
     new_role = role_data.get("role")
     if new_role not in ["admin", "user"]:
         raise HTTPException(status_code=400, detail="Invalid role")
@@ -85,4 +86,19 @@ async def change_role(id: str, role_data: dict, db: AsyncSession = Depends(get_d
         raise HTTPException(status_code=404, detail="User not found")
     
     user.role = new_role
+    return user
+
+@router.patch("/users/{id}/flag", response_model=UserResponse)
+async def toggle_user_flag(id: uuid.UUID, flag_data: dict, db: AsyncSession = Depends(get_db)):
+    is_flagged = flag_data.get("isFlagged")
+    if is_flagged is None:
+        raise HTTPException(status_code=400, detail="Missing 'isFlagged' in request body")
+    
+    stmt = select(User).where(User.id == id)
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    user.is_flagged = bool(is_flagged)
     return user

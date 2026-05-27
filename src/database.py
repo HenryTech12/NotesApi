@@ -10,8 +10,13 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL environment variable is not set")
 
+# Support local SQLite for testing/development if specified
+if DATABASE_URL.startswith("sqlite"):
+    # Ensure we use aiosqlite for async SQLite
+    if "aiosqlite" not in DATABASE_URL:
+        DATABASE_URL = DATABASE_URL.replace("sqlite://", "sqlite+aiosqlite://")
 # Ensure we use asyncpg for async SQLAlchemy
-if DATABASE_URL.startswith("postgresql://"):
+elif DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 engine = create_async_engine(DATABASE_URL, echo=False)

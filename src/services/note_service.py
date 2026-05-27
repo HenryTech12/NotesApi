@@ -6,6 +6,8 @@ from src.models.note import Note
 from src.models.user import User
 from typing import List, Optional, Any
 import uuid
+from datetime import datetime
+from src.services.groq_service import summarize, suggest_tags
 
 class NoteService:
     @staticmethod
@@ -73,14 +75,18 @@ class NoteService:
         note = Note(user_id=user_id, title=title, body=body, tags=tags)
         db.add(note)
         await db.flush()
+        await db.refresh(note)
         return note
 
     @staticmethod
-    async def get_note(db: AsyncSession, note_id: str, user: User, is_admin: bool = False) -> Optional[Note]:
-        try:
-            uid = uuid.UUID(note_id)
-        except ValueError:
-            return None
+    async def get_note(db: AsyncSession, note_id: uuid.UUID | str, user: User, is_admin: bool = False) -> Optional[Note]:
+        if isinstance(note_id, str):
+            try:
+                uid = uuid.UUID(note_id)
+            except ValueError:
+                return None
+        else:
+            uid = note_id
             
         stmt = select(Note).where(Note.id == uid)
         if not is_admin:
@@ -90,8 +96,7 @@ class NoteService:
         return result.scalar_one_or_none()
 
     @staticmethod
-    @staticmethod
-    async def update_note(db: AsyncSession, note_id: str, user: User, data: dict, is_admin: bool = False) -> Optional[Note]:
+    async def update_note(db: AsyncSession, note_id: uuid.UUID | str, user: User, data: dict, is_admin: bool = False) -> Optional[Note]:
         note = await NoteService.get_note(db, note_id, user, is_admin)
         if not note:
             return None
@@ -105,10 +110,11 @@ class NoteService:
         from datetime import datetime
         note.updated_at = datetime.utcnow()
         await db.flush()
+        await db.refresh(note)
         return note
 
     @staticmethod
-    async def delete_note(db: AsyncSession, note_id: str, user: User, is_admin: bool = False) -> bool:
+    async def delete_note(db: AsyncSession, note_id: uuid.UUID | str, user: User, is_admin: bool = False) -> bool:
         note = await NoteService.get_note(db, note_id, user, is_admin)
         if not note:
             return False
@@ -131,3 +137,42 @@ class NoteService:
             created.append(note)
         await db.flush()
         return created
+
+    @staticmethod
+    async def generate_summary(db: AsyncSession, note_id: uuid.UUID | str, user: User, model: Optional[str] = None, is_admin: bool = False) -> Optional[Note]:
+        note = await NoteService.get_note(db, note_id, user, is_admin)
+        if not note:
+            return None
+
+        # If summary already exists, return it
+        if getattr(note, "summary", None):
+            return note
+
+        summary_text, meta = await summarize(note.body, model=model)
+        if summary_text:
+            note.summary = summary_text
+            note.summary_generated_at = datetime.utcnow()
+            await db.flush()
+            await db.refresh(note)
+            return note
+        # On failure, do not raise - return note unchanged and let caller handle meta
+        return note
+
+    @staticmethod
+    async def suggest_tags(db: AsyncSession, note_id: uuid.UUID | str, user: User, model: Optional[str] = None, is_admin: bool = False) -> Optional[list[str]]:
+        note = await NoteService.get_note(db, note_id, user, is_admin)
+        if not note:
+            return None
+
+        tags, meta = await suggest_tags(note.body, model=model)
+        if tags:
+            # Merge suggested tags with existing ones without duplicates
+            existing = list(note.tags or [])
+            for t in tags:
+                if t not in existing:
+                    existing.append(t)
+            note.tags = existing
+            note.updated_at = datetime.utcnow()
+            await db.flush()
+            return note.tags
+        return []

@@ -55,6 +55,7 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     email: str
     role: str
+    is_flagged: bool
     created_at: datetime
 
     class Config:
