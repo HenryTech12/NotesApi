@@ -66,6 +66,22 @@ curl -X PUT "https://notesapi-sgvx.onrender.com/notes/{id}?api-version=2024-05-2
 curl -X DELETE "https://notesapi-sgvx.onrender.com/notes/{id}?api-version=2024-05-25"
 ```
 
+## 1.1 AI Features (Groq Llama 3.3)
+
+### Generate Summary
+
+```bash
+curl -X POST "https://notesapi-sgvx.onrender.com/notes/{id}/summary?api-version=2024-05-25" \
+     -H "Authorization: Bearer <TOKEN>"
+```
+
+### Auto-Suggest Tags
+
+```bash
+curl -X POST "https://notesapi-sgvx.onrender.com/notes/{id}/auto_tags?api-version=2024-05-25" \
+     -H "Authorization: Bearer <TOKEN>"
+```
+
 ---
 
 ## 2. Error Scenarios (Azure Error Format)

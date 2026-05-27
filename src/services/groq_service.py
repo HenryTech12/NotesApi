@@ -75,6 +75,16 @@ def _content_hash(content: str) -> str:
     return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 async def summarize(text: str, model: Optional[str] = None) -> Tuple[Optional[str], dict]:
+    """
+    Summarizes the given text using Groq AI.
+    
+    Args:
+        text: The content to summarize.
+        model: Optional Groq model ID.
+        
+    Returns:
+        A tuple of (summary, metadata). Metadata contains 'error' or 'cached' info.
+    """
     if not text:
         return None, {"error": "No text provided"}
     
@@ -102,6 +112,16 @@ async def summarize(text: str, model: Optional[str] = None) -> Tuple[Optional[st
         return None, {"error": f"Invalid response format: {str(e)}"}
 
 async def suggest_tags(text: str, model: Optional[str] = None) -> Tuple[List[str], dict]:
+    """
+    Suggests relevant tags for the given text using Groq AI.
+    
+    Args:
+        text: The content to analyze.
+        model: Optional Groq model ID.
+        
+    Returns:
+        A tuple of (tag_list, metadata). Metadata contains 'error' or 'cached' info.
+    """
     if not text:
         return [], {"error": "No text provided"}
 

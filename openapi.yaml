@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
     title: Notes API (Azure Aligned)
     description: Secure, multi-user, database-backed Notes REST API for IEEE x GitHub Codeathon.
-    version: 1.1.0
+    version: 1.2.0
 servers:
     - url: https://notesapi-sgvx.onrender.com
       description: Production server
@@ -331,6 +331,64 @@ paths:
                 "404":
                     $ref: "#/components/responses/NotFound"
 
+    /notes/{id}/summary:
+        parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                  type: string
+                  format: uuid
+        post:
+            summary: Generate a summary for a note
+            tags: [notes, ai]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Note"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
+    /notes/{id}/auto_tags:
+        parameters:
+            - name: id
+              in: path
+              required: true
+              schema:
+                  type: string
+                  format: uuid
+        post:
+            summary: Suggest tags for a note
+            tags: [notes, ai]
+            security:
+                - bearerAuth: []
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Note"
+                "404":
+                    $ref: "#/components/responses/NotFound"
+
     /notes/bulk:
         post:
             summary: Create multiple notes in bulk
@@ -645,6 +703,18 @@ components:
                     type: array
                     items:
                         type: string
+                summary:
+                    type: string
+                    nullable: true
+                summaryGeneratedAt:
+                    type: string
+                    format: date-time
+                    nullable: true
+                suggestedTags:
+                    type: array
+                    items:
+                        type: string
+                    nullable: true
                 createdAt:
                     type: string
                     format: date-time

@@ -5,12 +5,25 @@
 -   **Base URL:** [https://notesapi-sgvx.onrender.com](https://notesapi-sgvx.onrender.com)
 -   **Interactive Docs:** [https://notesapi-sgvx.onrender.com/docs](https://notesapi-sgvx.onrender.com/docs)
 
-A production-grade REST API built with FastAPI, PostgreSQL (SQLAlchemy Async), and Alembic, strictly adhering to the **Microsoft Azure REST API Guidelines**.
+## 📸 Development Progress
+
+-   **[Day 1: Initial Setup & Auth](postman-screenshots/MINGW64__c_Users_DELL%205_25_2026%2011_16_55%20PM.png)**
+-   **[Day 2: Notes CRUD & Azure Alignment](curl-screenshot-day2/MINGW64__c_Users_DELL%205_26_2026%2010_22_12%20PM.png)**
+-   **[Day 3: Groq AI Integration](curl-screenshot-day3/MINGW64__c_Users_DELL%205_27_2026%208_10_41%20PM.png)**
+
+A production-grade REST API built with FastAPI, PostgreSQL/SQLite (SQLAlchemy Async), and Alembic, strictly adhering to the **Microsoft Azure REST API Guidelines**. Now supercharged with **Groq AI** for intelligent summaries and tag suggestions.
+
+## ✨ AI Features (New!)
+
+This API now integrates **Groq API (Llama 3.3 70B)** to provide:
+-   **Auto-Summarization:** Generates concise summaries of your notes.
+-   **Smart Tagging:** Suggests relevant tags based on the note's content.
+-   **Response Caching:** AI responses are cached for 1 hour to optimize performance and reduce API costs.
 
 ## 🚀 Setup & Run
 
 1. **Environment Config:**
-   Copy `.env.example` to `.env` and fill in your values.
+   Copy `.env.example` to `.env` and fill in your values. Make sure to include your `GROQ_API_KEY`.
 
     ```bash
     cp .env.example .env
@@ -135,6 +148,22 @@ The `api-version` query parameter is **required** for all requests. Authenticati
     ```bash
     curl -i -X DELETE -H "Authorization: Bearer <TOKEN>" \
          "http://localhost:3000/notes/{id}?api-version=2024-05-25"
+    ```
+
+### 🤖 AI-Powered Operations
+
+-   **Generate Summary:**
+    Generates a concise summary of a specific note using Llama 3.3.
+    ```bash
+    curl -i -X POST -H "Authorization: Bearer <TOKEN>" \
+         "http://localhost:3000/notes/{id}/summary?api-version=2024-05-25"
+    ```
+
+-   **Auto-Suggest Tags:**
+    Suggests relevant metadata tags based on the note's content.
+    ```bash
+    curl -i -X POST -H "Authorization: Bearer <TOKEN>" \
+         "http://localhost:3000/notes/{id}/auto_tags?api-version=2024-05-25"
     ```
 
 ### 🛡️ Admin Features (Admin Role Only)
