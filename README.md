@@ -46,6 +46,10 @@ This API now integrates **Groq API (Llama 3.3 70B)** to provide:
     python src/main.py
     ```
 
+## 🌐 Deployment note (Render)
+
+This project is optimized for **Python 3.13.x**. If you encounter `greenlet` build errors (common on Python 3.14+), ensure you have a `runtime.txt` file specifying `python-3.13.1` or similar.
+
 ## 📋 API Overview
 
 The `api-version` query parameter is **required** for all requests. Authentication uses JWT Bearer tokens.
