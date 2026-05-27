@@ -20,7 +20,26 @@ This API now integrates **Groq API (Llama 3.3 70B)** to provide:
 -   **Smart Tagging:** Suggests relevant tags based on the note's content.
 -   **Response Caching:** AI responses are cached for 1 hour to optimize performance and reduce API costs.
 
-## 🚀 Setup & Run
+## �️ Architectural Resilience & Compliance
+
+This project is built with production-grade patterns focused on reliability and security:
+
+### 1. Error Handling & Network Resiliency
+Aligned with [Azure Retry Patterns](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry), the AI integration features:
+-   **Exponential Backoff**: Retries on transient errors (429, 5xx) with increasing delays.
+-   **Jitter**: Randomized delays to prevent synchronized retry spikes (thundering herd).
+-   **Timeout Controls**: Strict `httpx` timeouts to prevent hanging connections.
+
+### 2. Secrets Management (12-Factor App)
+Aligned with [Twelve-Factor App (III. Config)](https://12factor.net/config):
+-   **Env-Var Driven**: All configuration is decoupled from code and injected via environment variables.
+-   **Zero Hardcoding**: No API keys, database credentials, or JWT secrets are stored in the codebase.
+-   **Secure Isolation**: `.env` is ignored by version control to prevent accidental leaks.
+
+### 3. Database Fault Tolerance
+-   **Connection Pooling**: Uses SQLAlchemy async pooling with `pool_pre_ping=True` to detect and recover from dropped DB connections automatically.
+
+## �🚀 Setup & Run
 
 1. **Environment Config:**
    Copy `.env.example` to `.env` and fill in your values. Make sure to include your `GROQ_API_KEY`.
